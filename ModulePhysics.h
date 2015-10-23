@@ -23,6 +23,7 @@ public:
 	float GetRotation() const;
 	bool Contains(int x, int y) const;
 	int RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const;
+	void Turn(int degrees);
 
 public:
 	int width, height;
@@ -53,8 +54,12 @@ public:
 	PhysBody* AddWall(int x, int y, int* points, int size);
 	PhysBody* AddFlipper(int x, int y, int* points, int size, SDL_Texture*);
 
+	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, int max_angle = INT_MAX, int min_angle = INT_MIN);
+
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);
+
+	void Turn(int degrees);
 
 private:
 

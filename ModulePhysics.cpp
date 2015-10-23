@@ -527,3 +527,27 @@ void ModulePhysics::BeginContact(b2Contact* contact)
 	if(physB && physB->listener != NULL)
 		physB->listener->OnCollision(physB, physA);
 }
+
+void ModulePhysics::RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, int y_pivot1, int x_pivot2, int y_pivot2, int max_angle, int min_angle)
+{
+	b2RevoluteJointDef def;
+	def.bodyA = body1->body;
+	def.bodyB = body2->body;
+
+	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot1), PIXEL_TO_METERS(y_pivot1));
+	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot2), PIXEL_TO_METERS(y_pivot2));
+
+	if (max_angle != INT_MAX && min_angle != INT_MIN)
+	{
+		def.enableLimit = true;
+		def.upperAngle = DEGTORAD * max_angle;
+		def.lowerAngle = DEGTORAD * min_angle;
+	}
+
+	world->CreateJoint(&def);
+}
+
+void PhysBody::Turn(int degrees)
+{
+	body->ApplyAngularImpulse(DEGTORAD * degrees, true);
+}

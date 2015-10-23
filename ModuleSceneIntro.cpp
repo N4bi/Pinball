@@ -232,8 +232,9 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
 	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
 
-	flipper1 = App->physics->AddFlipper(177,953, flipper, 34, flipper_texture);	
+	flipper1 = App->physics->AddFlipper(177, 953, flipper, 34, flipper_texture);	
 	flipper_wheel = App->physics->CreateCircleStatic(193, 958, 10);
+	App->physics->RevoluteJoint(flipper1, flipper_wheel, 14, 17, 0, 0, 50, -50);
 
 
 
@@ -326,6 +327,12 @@ update_status ModuleSceneIntro::Update()
 		balls.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 12));
 		balls.getLast()->data->listener = this;
 	}
+
+	//if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+	//{
+	//	flipper1->Turn(-360);
+	//	LOG("flipper turn\n");
+	//}
 
 
 	// Prepare for raycast ------------------------------------------------------
