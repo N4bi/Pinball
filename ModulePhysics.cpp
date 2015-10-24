@@ -149,6 +149,34 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 	return pbody;
 }
 
+PhysBody* ModulePhysics::CreateRectangle(const SDL_Rect& rect)
+{
+	b2BodyDef body;
+	body.type = b2_dynamicBody;
+	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
+
+	b2Body* b = world->CreateBody(&body);
+	b2PolygonShape box;
+
+	box.SetAsBox(PIXEL_TO_METERS(rect.w/2), PIXEL_TO_METERS(rect.h/2));
+
+	b2FixtureDef fixture;
+	fixture.shape = &box;
+	fixture.density = 1.0f;
+
+	b->CreateFixture(&fixture);
+
+	PhysBody* pbody = new PhysBody();
+	pbody->body = b;
+	b->SetUserData(pbody);
+	pbody->width = rect.w/2;
+	pbody->height = rect.h/2;
+
+	return pbody;
+}
+
+
+
 PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int height)
 {
 	b2BodyDef body;
@@ -530,6 +558,7 @@ void ModulePhysics::BeginContact(b2Contact* contact)
 
 void ModulePhysics::RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, int y_pivot1, int x_pivot2, int y_pivot2, int max_angle, int min_angle)
 {
+
 	b2RevoluteJointDef def;
 	def.bodyA = body1->body;
 	def.bodyB = body2->body;
@@ -537,17 +566,46 @@ void ModulePhysics::RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1
 	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot1), PIXEL_TO_METERS(y_pivot1));
 	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot2), PIXEL_TO_METERS(y_pivot2));
 
+
+
+
 	if (max_angle != INT_MAX && min_angle != INT_MIN)
 	{
+		def.enableMotor = true;
+		def.maxMotorTorque = 1000.0f;
 		def.enableLimit = true;
 		def.upperAngle = DEGTORAD * max_angle;
 		def.lowerAngle = DEGTORAD * min_angle;
 	}
+	//MEJORAR
 
-	world->CreateJoint(&def);
+	b2RevoluteJoint* m_leftJoint;
+
+	m_leftJoint = (b2RevoluteJoint*)world->CreateJoint(&def);
 }
 
 void PhysBody::Turn(int degrees)
 {
-	body->ApplyAngularImpulse(DEGTORAD * degrees, true);
+	
 }
+
+void PhysBody::Push(float x, float y)
+{
+	body->ApplyForceToCenter(b2Vec2(x, y), true);
+}
+
+void ModulePhysics::LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, int y_pivot1, int x_pivot2, int y_pivot2, float frequency, float damping)
+{
+	b2DistanceJointDef def;
+	def.bodyA = body1->body;
+	def.bodyB = body2->body;
+
+	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot1), PIXEL_TO_METERS(y_pivot1));
+	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot2), PIXEL_TO_METERS(y_pivot2));
+
+	def.dampingRatio = damping;
+	def.frequencyHz = frequency;
+
+	world->CreateJoint(&def);
+}
+

@@ -29,13 +29,14 @@ bool ModuleSceneIntro::Start()
 	box = App->textures->Load("pinball/crate.png");
 	rick = App->textures->Load("pinball/rick_head.png");
 	ball = App->textures->Load("pinball/ball.png");
-	table = App->textures->Load("pinball/ground.png");
+	table = App->textures->Load("pinball/ground3.png");
 	flipper_texture = App->textures->Load("pinball/flipper.png");
+	spring_texture = App->textures->Load("pinball/spring.png");
 	
 
 	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
 
-	sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
+	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 	
 
 	int triangle_right[44] = {
@@ -234,7 +235,14 @@ bool ModuleSceneIntro::Start()
 
 	flipper1 = App->physics->AddFlipper(177, 953, flipper, 34, flipper_texture);	
 	flipper_wheel = App->physics->CreateCircleStatic(193, 958, 10);
-	App->physics->RevoluteJoint(flipper1, flipper_wheel, 14, 17, 0, 0, 50, -50);
+	//App->physics->RevoluteJoint(flipper1, flipper_wheel, 14, 17, 0, 0, 50, -50);
+
+	//spring = App->physics->CreateRectangle(506, 892, 22, 25);
+	spring = App->physics->CreateRectangle({ 506, 892, 22, 25 });
+	spring_wheel = App->physics->CreateCircleStatic(496, 883, 3);
+	App->physics->LineJoint(spring, spring_wheel, 0, 0, 0, 0, 30.0f, 1.0f);
+
+	
 
 
 
@@ -253,11 +261,18 @@ bool ModuleSceneIntro::CleanUp()
 // Update: draw background
 update_status ModuleSceneIntro::Update()
 { 
+	float spring_push = 0.0f;
+
 	App->renderer->Blit(table, 0, 0);
 
 	int x, y;
 	flipper1->GetPosition(x, y);
 	App->renderer->Blit(flipper_texture, x, y);
+
+	spring->GetPosition(x, y);
+	App->renderer->Blit(spring_texture, x, y);
+
+
 
 	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
@@ -318,9 +333,6 @@ update_status ModuleSceneIntro::Update()
 		ricks.add(App->physics->CreateChain(App->input->GetMouseX(), App->input->GetMouseY(), rick_head, 64));
 	}
 
-	// Pivot 0, 0
-
-
 
 	if (App->input->GetKey(SDL_SCANCODE_5) == KEY_DOWN)
 	{
@@ -328,10 +340,19 @@ update_status ModuleSceneIntro::Update()
 		balls.getLast()->data->listener = this;
 	}
 
-	//if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+	{
+		LOG("flipper turn\n");
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_DOWN) || App->input->GetKey(SDL_SCANCODE_DOWN == KEY_REPEAT))
+	{
+		spring_push += 175.0f;
+		spring->Push(0, spring_push);
+	}
+	//else
 	//{
-	//	flipper1->Turn(-360);
-	//	LOG("flipper turn\n");
+	//	spring_push = 0.0f;
 	//}
 
 

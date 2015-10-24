@@ -24,6 +24,7 @@ public:
 	bool Contains(int x, int y) const;
 	int RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const;
 	void Turn(int degrees);
+	void Push(float x, float y);
 
 public:
 	int width, height;
@@ -46,6 +47,7 @@ public:
 
 	PhysBody* CreateCircle(int x, int y, int radius);
 	PhysBody* CreateRectangle(int x, int y, int width, int height);
+	PhysBody* CreateRectangle(const SDL_Rect& rect);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height);
 	PhysBody* CreateChain(int x, int y, int* points, int size);
 	PhysBody* CreateCircleStatic(int x, int y, int radius);
@@ -55,7 +57,7 @@ public:
 	PhysBody* AddFlipper(int x, int y, int* points, int size, SDL_Texture*);
 
 	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, int max_angle = INT_MAX, int min_angle = INT_MIN);
-
+	void LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, float frequency = 10.0f, float damping = 0.5f);
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);
 
