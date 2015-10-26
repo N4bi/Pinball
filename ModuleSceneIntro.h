@@ -25,6 +25,7 @@ public:
 	p2List<PhysBody*> walls;
 	PhysBody* flipper1;
 	PhysBody* flipper_wheel;
+	PhysBody* flipper_wheel_dynamic;
 	PhysBody* spring;
 	PhysBody* spring_wheel;
 

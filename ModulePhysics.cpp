@@ -20,6 +20,16 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 
 }
 
+PhysBody::PhysBody(b2Body* body, const SDL_Rect& rect) : body(body), rect(rect), listener(NULL)
+{}
+
+PhysBody::~PhysBody()
+{
+	body->GetWorld()->DestroyBody(body);
+	body = NULL;
+	listener = NULL;
+}
+
 // Destructor
 ModulePhysics::~ModulePhysics()
 {
@@ -74,6 +84,12 @@ update_status ModulePhysics::PreUpdate()
 	}
 
 	return UPDATE_CONTINUE;
+}
+void ModulePhysics::DestroyBody(PhysBody* body)
+{
+	assert(body);
+	bodies.del(bodies.findNode(body));
+	delete body;
 }
 
 PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
@@ -312,7 +328,7 @@ PhysBody* ModulePhysics::AddFlipper(int x, int y, int* points, int size, SDL_Tex
 
 	b2Body* b = world->CreateBody(&body);
 
-	b2ChainShape shape;
+	b2PolygonShape shape;
 	b2Vec2* p = new b2Vec2[size / 2];
 
 	for (uint i = 0; i < size / 2; ++i)
@@ -321,7 +337,7 @@ PhysBody* ModulePhysics::AddFlipper(int x, int y, int* points, int size, SDL_Tex
 		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
 	}
 
-	shape.CreateLoop(p, size / 2);
+	shape.Set(p, size / 2);
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
@@ -339,6 +355,46 @@ PhysBody* ModulePhysics::AddFlipper(int x, int y, int* points, int size, SDL_Tex
 	return pbody;
 }
 
+PhysBody* ModulePhysics::CreateFlipper(const SDL_Rect& rect, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture* texture)
+{
+	b2BodyDef body;
+	body.type = b2_dynamicBody;
+	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
+	body.angle = 0.0f;
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2PolygonShape shape;
+	b2Vec2* p = new b2Vec2[size / 2];
+
+	for (uint i = 0; i < size / 2; ++i)
+	{
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
+		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
+	}
+
+	shape.Set(p, size / 2);
+
+	b2FixtureDef box_fixture;
+	box_fixture.shape = &shape;
+	box_fixture.density = density;
+	box_fixture.restitution = restitution;
+	box_fixture.isSensor = isSensor;
+
+	b->CreateFixture(&box_fixture);
+
+	PhysBody* ret = new PhysBody(b, { rect.x, rect.y, rect.w, rect.h });
+	ret->texture = texture;
+	bodies.add(ret);
+
+	delete[] p;
+
+	b->SetUserData(ret);
+
+	return ret;
+
+
+}
 // 
 update_status ModulePhysics::PostUpdate()
 {
@@ -484,6 +540,15 @@ bool ModulePhysics::CleanUp()
 {
 	LOG("Destroying physics world");
 
+	p2List_item<PhysBody*>* item = bodies.getFirst();
+
+	while (item != NULL)
+	{
+		delete item->data;
+		item = item->next;
+	}
+
+	bodies.clear();
 	// Delete the whole physics world!
 	delete world;
 
@@ -560,33 +625,26 @@ void ModulePhysics::RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1
 {
 
 	b2RevoluteJointDef def;
+	//def.Initialize(body1->body, body2->body, PIXEL_TO_METERS(body1->body->GetWorldCenter()));
+
 	def.bodyA = body1->body;
 	def.bodyB = body2->body;
+	def.collideConnected = false;
 
 	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot1), PIXEL_TO_METERS(y_pivot1));
 	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot2), PIXEL_TO_METERS(y_pivot2));
 
+	def.enableLimit = true; 
+	def.upperAngle = DEGTORAD * max_angle;
+	def.lowerAngle = DEGTORAD * min_angle;
+	
 
-
-
-	if (max_angle != INT_MAX && min_angle != INT_MIN)
-	{
-		def.enableMotor = true;
-		def.maxMotorTorque = 1000.0f;
-		def.enableLimit = true;
-		def.upperAngle = DEGTORAD * max_angle;
-		def.lowerAngle = DEGTORAD * min_angle;
-	}
-	//MEJORAR
-
-	b2RevoluteJoint* m_leftJoint;
-
-	m_leftJoint = (b2RevoluteJoint*)world->CreateJoint(&def);
+	m_joint = (b2RevoluteJoint*) world->CreateJoint(&def);
 }
 
 void PhysBody::Turn(int degrees)
 {
-	
+	body->ApplyAngularImpulse(DEGTORAD * degrees, true);
 }
 
 void PhysBody::Push(float x, float y)
@@ -606,6 +664,6 @@ void ModulePhysics::LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, in
 	def.dampingRatio = damping;
 	def.frequencyHz = frequency;
 
-	world->CreateJoint(&def);
+	dis_joint= (b2DistanceJoint*) world->CreateJoint(&def);
 }
 

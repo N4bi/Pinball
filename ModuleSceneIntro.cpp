@@ -25,17 +25,18 @@ bool ModuleSceneIntro::Start()
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
-	circle = App->textures->Load("pinball/wheel.png"); 
-	box = App->textures->Load("pinball/crate.png");
-	rick = App->textures->Load("pinball/rick_head.png");
-	ball = App->textures->Load("pinball/ball.png");
-	table = App->textures->Load("pinball/ground3.png");
-	flipper_texture = App->textures->Load("pinball/flipper.png");
-	spring_texture = App->textures->Load("pinball/spring.png");
+	circle = App->textures->Load("Game/pinball/wheel.png"); 
+	box = App->textures->Load("Game/pinball/crate.png");
+	rick = App->textures->Load("Game/pinball/rick_head.png");
+	ball = App->textures->Load("Game/pinball/ball.png");
+	table = App->textures->Load("Game/pinball/ground3.png");
+	flipper_texture = App->textures->Load("Game/pinball/flipper.png");
+	spring_texture = App->textures->Load("Game/pinball/spring.png");
 	
 
-	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
+	bonus_fx = App->audio->LoadFx("Game/pinball/bonus.wav");
 
+	
 	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 	
 
@@ -180,8 +181,8 @@ bool ModuleSceneIntro::Start()
 		172, 1023
 	};
 
-	int flipper[34] = {
-		36, 46,
+	int flipper[16] = {
+	/*	36, 46,
 		48, 53,
 		52, 55,
 		57, 55,
@@ -197,7 +198,7 @@ bool ModuleSceneIntro::Start()
 		2, 22,
 		3, 27,
 		10, 31,
-		34, 45
+		34, 45*/
 
 	/*	186, 950,
 		195, 950,
@@ -212,6 +213,15 @@ bool ModuleSceneIntro::Start()
 		178, 968,
 		179, 959,
 		184, 952*/
+
+		9, 2,
+		22, 3,
+		61, 43,
+		61, 53,
+		49, 53,
+		3, 27,
+		0, 14,
+		6, 4
 	};
 
 	int flipper_wheel1[16] = {
@@ -230,21 +240,16 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, triangle_right, 44));
 	walls.add(App->physics->AddWall(0, 0, launcher, 90));
 	
-	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
-	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
+	//walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
+	//walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
 
-	flipper1 = App->physics->AddFlipper(177, 953, flipper, 34, flipper_texture);	
-	flipper_wheel = App->physics->CreateCircleStatic(193, 958, 10);
-	//App->physics->RevoluteJoint(flipper1, flipper_wheel, 14, 17, 0, 0, 50, -50);
+	flipper1 = App->physics->AddFlipper(177, 953, flipper, 16, flipper_texture);
+	flipper_wheel = App->physics->CreateCircleStatic(177+10, 953+10, 5);
+	App->physics->RevoluteJoint(flipper1,flipper_wheel, 10, 10, 0, 0, 30, 1);
 
-	//spring = App->physics->CreateRectangle(506, 892, 22, 25);
-	spring = App->physics->CreateRectangle({ 506, 892, 22, 25 });
+	spring = App->physics->CreateRectangle(506, 892, 22, 25);
 	spring_wheel = App->physics->CreateCircleStatic(496, 883, 3);
-	App->physics->LineJoint(spring, spring_wheel, 0, 0, 0, 0, 30.0f, 1.0f);
-
-	
-
-
+	App->physics->LineJoint(spring, spring_wheel, 10, 9, 0, 0, 30.0f, 1.0f);
 
 	
 	return ret;
@@ -343,6 +348,7 @@ update_status ModuleSceneIntro::Update()
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
 		LOG("flipper turn\n");
+		flipper1->Turn(360);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_DOWN) || App->input->GetKey(SDL_SCANCODE_DOWN == KEY_REPEAT))
@@ -350,10 +356,10 @@ update_status ModuleSceneIntro::Update()
 		spring_push += 175.0f;
 		spring->Push(0, spring_push);
 	}
-	//else
-	//{
-	//	spring_push = 0.0f;
-	//}
+	else
+	{
+		spring_push = 0.0f;
+	}
 
 
 	// Prepare for raycast ------------------------------------------------------

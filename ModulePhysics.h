@@ -17,7 +17,10 @@ class PhysBody
 {
 public:
 	PhysBody() : listener(NULL), body(NULL)
-	{}
+	{};
+
+	PhysBody(b2Body* body, const SDL_Rect& rect);
+	~PhysBody();
 
 	void GetPosition(int& x, int &y) const;
 	float GetRotation() const;
@@ -31,6 +34,9 @@ public:
 	b2Body* body;
 	Module* listener;
 	SDL_Texture* texture;
+
+private:
+	SDL_Rect rect;
 };
 
 // Module --------------------------------------
@@ -52,14 +58,16 @@ public:
 	PhysBody* CreateChain(int x, int y, int* points, int size);
 	PhysBody* CreateCircleStatic(int x, int y, int radius);
 	PhysBody* CreateChainStatic(int x, int y, int* points, int size);
+	PhysBody* CreateFlipper(const SDL_Rect& rect, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
 
 	PhysBody* AddWall(int x, int y, int* points, int size);
 	PhysBody* AddFlipper(int x, int y, int* points, int size, SDL_Texture*);
 
-	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, int max_angle = INT_MAX, int min_angle = INT_MIN);
+	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 , int y_pivot1 , int x_pivot2 , int y_pivot2 , int max_angle, int min_angle);
 	void LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, float frequency = 10.0f, float damping = 0.5f);
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);
+	void DestroyBody(PhysBody* body);
 
 	void Turn(int degrees);
 
@@ -68,8 +76,11 @@ private:
 	bool debug;
 	b2World* world;
 	b2MouseJoint* mouse_joint;
+	b2RevoluteJoint* m_joint;
+	b2DistanceJoint* dis_joint;
 	b2Body* ground;
 	b2Body* click_body;
+	p2List<PhysBody*> bodies;
 
 	float32 time_step;
 	int32 velocity_iter;
