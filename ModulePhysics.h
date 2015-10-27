@@ -60,8 +60,10 @@ public:
 	PhysBody* CreateChainStatic(int x, int y, int* points, int size);
 	PhysBody* CreateFlipper(const SDL_Rect& rect, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
 
+
 	PhysBody* AddWall(int x, int y, int* points, int size);
-	PhysBody* AddFlipper(int x, int y, int* points, int size, SDL_Texture*);
+	PhysBody* AddFlipper(SDL_Texture*);
+	PhysBody* AddSpring(int x, int y, SDL_Texture*);
 
 	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 , int y_pivot1 , int x_pivot2 , int y_pivot2 , int max_angle, int min_angle);
 	void LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, float frequency = 10.0f, float damping = 0.5f);
@@ -70,14 +72,17 @@ public:
 	void DestroyBody(PhysBody* body);
 
 	void Turn(int degrees);
+	b2PrismaticJoint* spring_joint;
+	b2RevoluteJoint* m_joint;
 
 private:
 
 	bool debug;
 	b2World* world;
 	b2MouseJoint* mouse_joint;
-	b2RevoluteJoint* m_joint;
+
 	b2DistanceJoint* dis_joint;
+	
 	b2Body* ground;
 	b2Body* click_body;
 	p2List<PhysBody*> bodies;

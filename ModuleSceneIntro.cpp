@@ -240,16 +240,12 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, triangle_right, 44));
 	walls.add(App->physics->AddWall(0, 0, launcher, 90));
 	
-	//walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
-	//walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
+	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
+	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
 
-	flipper1 = App->physics->AddFlipper(177, 953, flipper, 16, flipper_texture);
-	flipper_wheel = App->physics->CreateCircleStatic(177+10, 953+10, 5);
-	App->physics->RevoluteJoint(flipper1,flipper_wheel, 10, 10, 0, 0, 30, 1);
+	flipper1 = App->physics->AddFlipper(flipper_texture);
+	spring = App->physics->AddSpring(515, 980, spring_texture);
 
-	spring = App->physics->CreateRectangle(506, 892, 22, 25);
-	spring_wheel = App->physics->CreateCircleStatic(496, 883, 3);
-	App->physics->LineJoint(spring, spring_wheel, 10, 9, 0, 0, 30.0f, 1.0f);
 
 	
 	return ret;
@@ -271,8 +267,8 @@ update_status ModuleSceneIntro::Update()
 	App->renderer->Blit(table, 0, 0);
 
 	int x, y;
-	flipper1->GetPosition(x, y);
-	App->renderer->Blit(flipper_texture, x, y);
+	//flipper1->GetPosition(x, y);
+	//App->renderer->Blit(flipper_texture, x, y);
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
@@ -347,20 +343,24 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
-		LOG("flipper turn\n");
-		flipper1->Turn(360);
+		App->physics->m_joint->SetMotorSpeed(30.0f);
+		
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_UP)
+	{
+		App->physics->m_joint->SetMotorSpeed(-30.0f);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_DOWN) || App->input->GetKey(SDL_SCANCODE_DOWN == KEY_REPEAT))
 	{
-		spring_push += 175.0f;
-		spring->Push(0, spring_push);
-	}
-	else
-	{
-		spring_push = 0.0f;
+		App->physics->spring_joint->SetMotorSpeed(20.0f);
 	}
 
+	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_UP))
+	{
+		App->physics->spring_joint->SetMotorSpeed(-20.0f);
+	}
 
 	// Prepare for raycast ------------------------------------------------------
 	
