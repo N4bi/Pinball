@@ -243,7 +243,8 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
 	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
 
-	flipper1 = App->physics->AddFlipper(flipper_texture);
+	//flipper1 = App->physics->AddFlipper(flipper_texture);
+	flipper1 = App->physics->CreateFlipper(177, 953,177+16,953+16, flipper, 16, 1.0f, 0.0f, false, false, flipper_texture);
 	spring = App->physics->AddSpring(515, 980, spring_texture);
 
 
@@ -268,7 +269,7 @@ update_status ModuleSceneIntro::Update()
 
 	int x, y;
 	flipper1->GetPosition(x, y);
-	App->renderer->Blit(flipper_texture, x, y);
+	App->renderer->Blit(flipper_texture, x, y,NULL,1.0f,flipper1->GetAngle(),0,0);
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
@@ -343,13 +344,13 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
-		App->physics->m_joint->SetMotorSpeed(1000.0f);
+		App->physics->m_joint->SetMotorSpeed(100.0f);
 		
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_UP)
 	{
-		App->physics->m_joint->SetMotorSpeed(-1000.0f);
+		App->physics->m_joint->SetMotorSpeed(-100.0f);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_DOWN) || App->input->GetKey(SDL_SCANCODE_DOWN == KEY_REPEAT))

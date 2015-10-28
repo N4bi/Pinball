@@ -308,6 +308,7 @@ PhysBody* ModulePhysics::AddWall(int x, int y, int* points, int size)
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
+	fixture.restitution = 0.4f;
 
 	b->CreateFixture(&fixture);
 
@@ -353,6 +354,27 @@ PhysBody* ModulePhysics::AddFlipper(SDL_Texture* texture)
 	flipper_fixture.shape = &flipper_shape;
 	flipper_fixture.density = 1.0f;
 	flipper->CreateFixture(&flipper_fixture);
+	//int size = 16;
+	//int* points;
+
+	//b2PolygonShape flipper_shape;
+	//b2Vec2* p = new b2Vec2[size / 2];
+
+	//for (uint i = 0; i < size / 2; ++i)
+	//{
+	//	p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
+	//	p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
+	//}
+
+	//flipper_shape.Set(p, size / 2);
+
+	//b2FixtureDef box_fixture;
+	//box_fixture.shape = &flipper_shape;
+	//box_fixture.density = 1.0f;
+	//box_fixture.restitution = 1.0f;
+	//box_fixture.isSensor = isSensor;
+
+	//flipper->CreateFixture(&box_fixture);
 
 	PhysBody* ret = new PhysBody();
 	ret->body = flipper;
@@ -360,6 +382,7 @@ PhysBody* ModulePhysics::AddFlipper(SDL_Texture* texture)
 	ret->texture = texture;
 	ret->width = flipper_w * 0.5f;
 	ret->height = flipper_h * 0.5f;
+	//ret->width = ret->height = 0;
 
 	//JOINT
 
@@ -370,7 +393,7 @@ PhysBody* ModulePhysics::AddFlipper(SDL_Texture* texture)
 	revolute_joint_def.enableLimit = true;
 	revolute_joint_def.enableMotor = true;
 	revolute_joint_def.motorSpeed = 0.0f;
-	revolute_joint_def.maxMotorTorque = 1000.0f;
+	revolute_joint_def.maxMotorTorque = 100.0f;
 	
 
 	revolute_joint_def.lowerAngle = -30.0f * DEGTORAD;
@@ -386,16 +409,41 @@ PhysBody* ModulePhysics::AddFlipper(SDL_Texture* texture)
 	return ret;
 }
 
-PhysBody* ModulePhysics::CreateFlipper(const SDL_Rect& rect, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture* texture)
+PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_pos_x,int pivot_pos_y, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture* texture)
 {
-	b2BodyDef body;
-	body.type = b2_dynamicBody;
-	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
-	body.angle = 0.0f;
 
-	b2Body* b = world->CreateBody(&body);
+	b2Vec2 circle_pos(pivot_pos_x, pivot_pos_y);
+	b2Vec2 flipper_pos(flipper_pos_x, flipper_pos_y);
+	float radius = 5;
+	//int flipper_w = 73;
+	//int flipper_h = 15;
 
-	b2PolygonShape shape;
+	b2BodyDef circle_def;
+	circle_def.position.Set(PIXEL_TO_METERS(circle_pos.x), PIXEL_TO_METERS(circle_pos.y));
+	circle_def.type = b2_staticBody;
+	b2Body* circle = world->CreateBody(&circle_def);
+
+	b2CircleShape circle_shape;
+	circle_shape.m_radius = PIXEL_TO_METERS(radius);
+
+	b2FixtureDef circle_fixture;
+	circle_fixture.shape = &circle_shape;
+	circle->CreateFixture(&circle_fixture);
+
+	b2BodyDef flipper_def;
+	flipper_def.position.Set(PIXEL_TO_METERS(flipper_pos.x), PIXEL_TO_METERS(flipper_pos.y));
+	flipper_def.type = b2_dynamicBody;
+	b2Body* flipper = world->CreateBody(&flipper_def);
+
+	//b2PolygonShape flipper_shape;
+	//flipper_shape.SetAsBox(PIXEL_TO_METERS(flipper_w)*0.5f, PIXEL_TO_METERS(flipper_h)*0.5f);
+
+	//b2FixtureDef flipper_fixture;
+	//flipper_fixture.shape = &flipper_shape;
+	//flipper_fixture.density = 1.0f;
+	//flipper->CreateFixture(&flipper_fixture);
+
+	b2PolygonShape flipper_shape;
 	b2Vec2* p = new b2Vec2[size / 2];
 
 	for (uint i = 0; i < size / 2; ++i)
@@ -404,23 +452,47 @@ PhysBody* ModulePhysics::CreateFlipper(const SDL_Rect& rect, int* points, uint s
 		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
 	}
 
-	shape.Set(p, size / 2);
+	flipper_shape.Set(p, size / 2);
 
 	b2FixtureDef box_fixture;
-	box_fixture.shape = &shape;
+	box_fixture.shape = &flipper_shape;
 	box_fixture.density = density;
 	box_fixture.restitution = restitution;
 	box_fixture.isSensor = isSensor;
 
-	b->CreateFixture(&box_fixture);
+	flipper->CreateFixture(&box_fixture);
 
-	PhysBody* ret = new PhysBody(b, { rect.x, rect.y, rect.w, rect.h });
+	delete p;
+
+	PhysBody* ret = new PhysBody();
+	ret->body = flipper;
+	flipper->SetUserData(ret);
 	ret->texture = texture;
-	bodies.add(ret);
+	//ret->width = ret->height = 0;
+	//ret->height = flipper_h * 0.5f;
+	//ret->width = ret->height = 0;
 
-	delete[] p;
+	//JOINT
 
-	b->SetUserData(ret);
+	b2RevoluteJointDef revolute_joint_def;
+	revolute_joint_def.bodyA = flipper;
+	revolute_joint_def.bodyB = circle;
+	revolute_joint_def.collideConnected = false;
+	revolute_joint_def.enableLimit = true;
+	revolute_joint_def.enableMotor = true;
+	revolute_joint_def.motorSpeed = 0.0f;
+	revolute_joint_def.maxMotorTorque = 100.0f;
+
+
+	revolute_joint_def.lowerAngle = 0.0f * DEGTORAD;
+	revolute_joint_def.upperAngle = 70.0f * DEGTORAD;
+
+
+	revolute_joint_def.localAnchorA.Set(PIXEL_TO_METERS(16), PIXEL_TO_METERS(16));
+	revolute_joint_def.localAnchorB.Set(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0));
+
+	m_joint = (b2RevoluteJoint*)world->CreateJoint(&revolute_joint_def);
+
 
 	return ret;
 
@@ -725,6 +797,11 @@ void PhysBody::Turn(int degrees)
 void PhysBody::Push(float x, float y)
 {
 	body->ApplyForceToCenter(b2Vec2(x, y), true);
+}
+
+double PhysBody::GetAngle()const
+{
+	return RADTODEG * body->GetAngle();
 }
 
 void ModulePhysics::LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, int y_pivot1, int x_pivot2, int y_pivot2, float frequency, float damping)

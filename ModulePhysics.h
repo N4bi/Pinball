@@ -28,6 +28,7 @@ public:
 	int RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const;
 	void Turn(int degrees);
 	void Push(float x, float y);
+	double GetAngle() const;
 
 public:
 	int width, height;
@@ -58,7 +59,7 @@ public:
 	PhysBody* CreateChain(int x, int y, int* points, int size);
 	PhysBody* CreateCircleStatic(int x, int y, int radius);
 	PhysBody* CreateChainStatic(int x, int y, int* points, int size);
-	PhysBody* CreateFlipper(const SDL_Rect& rect, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
+	PhysBody* CreateFlipper(int flipper_pos_x, int flipper_pos_y,int pivot_x,int pivot_y, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
 
 
 	PhysBody* AddWall(int x, int y, int* points, int size);
