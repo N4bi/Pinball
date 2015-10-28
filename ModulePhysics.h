@@ -30,6 +30,7 @@ public:
 	void Push(float x, float y);
 	double GetAngle() const;
 
+
 public:
 	int width, height;
 	b2Body* body;
@@ -59,12 +60,11 @@ public:
 	PhysBody* CreateChain(int x, int y, int* points, int size);
 	PhysBody* CreateCircleStatic(int x, int y, int radius);
 	PhysBody* CreateChainStatic(int x, int y, int* points, int size);
-	PhysBody* CreateFlipper(int flipper_pos_x, int flipper_pos_y,int pivot_x,int pivot_y, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
+	PhysBody* CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_x, int pivot_y, int* points, uint size, int anchorA_x, int anchorA_y, int AnchorB_x, int AnchorB_y, float lower_angle, float upper_angle, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
 
 
 	PhysBody* AddWall(int x, int y, int* points, int size);
-	PhysBody* AddFlipper(SDL_Texture*);
-	PhysBody* AddSpring(int x, int y, SDL_Texture*);
+	PhysBody* AddSpring(int x_box, int y_box, int x_circle,int y_circle,int x_pivot_1,int x_pivot_2,int y_pivot_1,int y_pivot_2, float damping, float frequency, SDL_Texture*);
 
 	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 , int y_pivot1 , int x_pivot2 , int y_pivot2 , int max_angle, int min_angle);
 	void LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, float frequency = 10.0f, float damping = 0.5f);
@@ -72,7 +72,7 @@ public:
 	void BeginContact(b2Contact* contact);
 	void DestroyBody(PhysBody* body);
 
-	void Turn(int degrees);
+	
 
 
 private:
@@ -94,6 +94,5 @@ private:
 public:
 
 	b2PrismaticJoint* spring_joint;
-	b2RevoluteJoint* m_joint;
 	
 };

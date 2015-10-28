@@ -24,6 +24,7 @@ public:
 	p2List<PhysBody*> balls;
 	p2List<PhysBody*> walls;
 	PhysBody* flipper1;
+	PhysBody* flipper2;
 	PhysBody* flipper_wheel;
 	PhysBody* flipper_wheel_dynamic;
 	PhysBody* spring;
@@ -40,6 +41,7 @@ public:
 	SDL_Texture* ball;
 	SDL_Texture* table;
 	SDL_Texture* flipper_texture;
+	SDL_Texture* flipperDR_texture;
 	SDL_Texture* spring_texture;
 	uint bonus_fx;
 	p2Point<int> ray;

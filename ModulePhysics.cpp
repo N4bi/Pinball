@@ -322,101 +322,14 @@ PhysBody* ModulePhysics::AddWall(int x, int y, int* points, int size)
 	return pbody;
 }
 
-PhysBody* ModulePhysics::AddFlipper(SDL_Texture* texture)
-{
-	b2Vec2 circle_pos(177+20, 953+20);
-	b2Vec2 flipper_pos(177+30, 953+30);
-	float radius = 5;
-	int flipper_w = 73;
-	int flipper_h = 15;
 
-	b2BodyDef circle_def;
-	circle_def.position.Set(PIXEL_TO_METERS(circle_pos.x), PIXEL_TO_METERS(circle_pos.y));
-	circle_def.type = b2_staticBody;
-	b2Body* circle = world->CreateBody(&circle_def);
-
-	b2CircleShape circle_shape;
-	circle_shape.m_radius = PIXEL_TO_METERS(radius);
-
-	b2FixtureDef circle_fixture;
-	circle_fixture.shape = &circle_shape;
-	circle->CreateFixture(&circle_fixture);
-
-	b2BodyDef flipper_def;
-	flipper_def.position.Set(PIXEL_TO_METERS(flipper_pos.x), PIXEL_TO_METERS(flipper_pos.y));
-	flipper_def.type = b2_dynamicBody;
-	b2Body* flipper = world->CreateBody(&flipper_def);
-
-	b2PolygonShape flipper_shape;
-	flipper_shape.SetAsBox(PIXEL_TO_METERS(flipper_w)*0.5f, PIXEL_TO_METERS(flipper_h)*0.5f);
-	
-	b2FixtureDef flipper_fixture;
-	flipper_fixture.shape = &flipper_shape;
-	flipper_fixture.density = 1.0f;
-	flipper->CreateFixture(&flipper_fixture);
-	//int size = 16;
-	//int* points;
-
-	//b2PolygonShape flipper_shape;
-	//b2Vec2* p = new b2Vec2[size / 2];
-
-	//for (uint i = 0; i < size / 2; ++i)
-	//{
-	//	p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
-	//	p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
-	//}
-
-	//flipper_shape.Set(p, size / 2);
-
-	//b2FixtureDef box_fixture;
-	//box_fixture.shape = &flipper_shape;
-	//box_fixture.density = 1.0f;
-	//box_fixture.restitution = 1.0f;
-	//box_fixture.isSensor = isSensor;
-
-	//flipper->CreateFixture(&box_fixture);
-
-	PhysBody* ret = new PhysBody();
-	ret->body = flipper;
-	flipper->SetUserData(ret);
-	ret->texture = texture;
-	ret->width = flipper_w * 0.5f;
-	ret->height = flipper_h * 0.5f;
-	//ret->width = ret->height = 0;
-
-	//JOINT
-
-	b2RevoluteJointDef revolute_joint_def;
-	revolute_joint_def.bodyA = flipper;
-	revolute_joint_def.bodyB = circle;
-	revolute_joint_def.collideConnected = false;
-	revolute_joint_def.enableLimit = true;
-	revolute_joint_def.enableMotor = true;
-	revolute_joint_def.motorSpeed = 0.0f;
-	revolute_joint_def.maxMotorTorque = 100.0f;
-	
-
-	revolute_joint_def.lowerAngle = -30.0f * DEGTORAD;
-	revolute_joint_def.upperAngle = 50.0f * DEGTORAD;
-	
-	
-	revolute_joint_def.localAnchorA.Set(PIXEL_TO_METERS(-25), PIXEL_TO_METERS(0));
-	revolute_joint_def.localAnchorB.Set(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0));
-
-	m_joint = (b2RevoluteJoint*)world->CreateJoint(&revolute_joint_def);
-
-
-	return ret;
-}
-
-PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_pos_x,int pivot_pos_y, int* points, uint size, float density, float restitution, bool ccd, bool isSensor, SDL_Texture* texture)
+PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_pos_x, int pivot_pos_y, int* points, uint size, int anchorA_x, int anchorA_y, int AnchorB_x, int AnchorB_y, float lower_angle, float upper_angle, float density, float restitution, bool ccd, bool isSensor, SDL_Texture* texture)
 {
 
 	b2Vec2 circle_pos(pivot_pos_x, pivot_pos_y);
 	b2Vec2 flipper_pos(flipper_pos_x, flipper_pos_y);
 	float radius = 5;
-	//int flipper_w = 73;
-	//int flipper_h = 15;
+
 
 	b2BodyDef circle_def;
 	circle_def.position.Set(PIXEL_TO_METERS(circle_pos.x), PIXEL_TO_METERS(circle_pos.y));
@@ -435,13 +348,6 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 	flipper_def.type = b2_dynamicBody;
 	b2Body* flipper = world->CreateBody(&flipper_def);
 
-	//b2PolygonShape flipper_shape;
-	//flipper_shape.SetAsBox(PIXEL_TO_METERS(flipper_w)*0.5f, PIXEL_TO_METERS(flipper_h)*0.5f);
-
-	//b2FixtureDef flipper_fixture;
-	//flipper_fixture.shape = &flipper_shape;
-	//flipper_fixture.density = 1.0f;
-	//flipper->CreateFixture(&flipper_fixture);
 
 	b2PolygonShape flipper_shape;
 	b2Vec2* p = new b2Vec2[size / 2];
@@ -468,9 +374,6 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 	ret->body = flipper;
 	flipper->SetUserData(ret);
 	ret->texture = texture;
-	//ret->width = ret->height = 0;
-	//ret->height = flipper_h * 0.5f;
-	//ret->width = ret->height = 0;
 
 	//JOINT
 
@@ -479,29 +382,42 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 	revolute_joint_def.bodyB = circle;
 	revolute_joint_def.collideConnected = false;
 	revolute_joint_def.enableLimit = true;
-	revolute_joint_def.enableMotor = true;
-	revolute_joint_def.motorSpeed = 0.0f;
-	revolute_joint_def.maxMotorTorque = 100.0f;
 
 
-	revolute_joint_def.lowerAngle = 0.0f * DEGTORAD;
-	revolute_joint_def.upperAngle = 70.0f * DEGTORAD;
+	revolute_joint_def.lowerAngle = lower_angle * DEGTORAD;
+	revolute_joint_def.upperAngle = upper_angle * DEGTORAD;
 
 
-	revolute_joint_def.localAnchorA.Set(PIXEL_TO_METERS(16), PIXEL_TO_METERS(16));
-	revolute_joint_def.localAnchorB.Set(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0));
+	revolute_joint_def.localAnchorA.Set(PIXEL_TO_METERS(anchorA_x), PIXEL_TO_METERS(anchorA_y));
+	revolute_joint_def.localAnchorB.Set(PIXEL_TO_METERS(AnchorB_x), PIXEL_TO_METERS(AnchorB_y));
 
-	m_joint = (b2RevoluteJoint*)world->CreateJoint(&revolute_joint_def);
+	(b2RevoluteJoint*)world->CreateJoint(&revolute_joint_def);
 
 
 	return ret;
 
 }
 
-PhysBody* ModulePhysics::AddSpring(int x, int y, SDL_Texture* texture)
+PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, int x_circle, int y_circle, int x_pivot_1, int x_pivot_2, int y_pivot_1, int y_pivot_2, float damping, float frequency, SDL_Texture* texture)
 {
+	b2Vec2 circle_pos(x_circle, y_circle);
+	b2Vec2 box_pos(x_box,y_box);
+	int radius = 5;
+
+	b2BodyDef circle_def;
+	circle_def.position.Set(PIXEL_TO_METERS(circle_pos.x), PIXEL_TO_METERS(circle_pos.y));
+	circle_def.type = b2_staticBody;
+	b2Body* circle = world->CreateBody(&circle_def);
+
+	b2CircleShape circle_shape;
+	circle_shape.m_radius = PIXEL_TO_METERS(radius);
+
+	b2FixtureDef circle_fixture;
+	circle_fixture.shape = &circle_shape;
+	circle->CreateFixture(&circle_fixture);
+
 	b2BodyDef body;
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.position.Set(PIXEL_TO_METERS(box_pos.x), PIXEL_TO_METERS(box_pos.y));
 	body.type = b2_dynamicBody;
 
 	b2Body* b = world->CreateBody(&body);
@@ -509,6 +425,7 @@ PhysBody* ModulePhysics::AddSpring(int x, int y, SDL_Texture* texture)
 	b2PolygonShape shape;
 
 	int width = 16, height = 31;
+
 	shape.SetAsBox(PIXEL_TO_METERS(width)*0.5f, PIXEL_TO_METERS(height)*0.5f);
 
 	b2FixtureDef fixture;
@@ -526,22 +443,35 @@ PhysBody* ModulePhysics::AddSpring(int x, int y, SDL_Texture* texture)
 
 	//JOINT
 
-	b2Vec2 vec(b->GetPosition());
+	b2DistanceJointDef def;
 
-	b2PrismaticJointDef jointDef;
-	b2Vec2 worldAxis(1.0f, 0.0f);
-	jointDef.bodyA = ground;
-	jointDef.bodyB = b;
-	jointDef.localAnchorA.Set(vec.x, vec.y);
-	jointDef.localAxisA.Set(0, -1);
-	jointDef.lowerTranslation = -1.0f;
-	jointDef.upperTranslation = 1.0f;
-	jointDef.enableLimit = true;
-	jointDef.maxMotorForce = 20.0f;
-	jointDef.motorSpeed = 20.0f;
-	jointDef.enableMotor = true;
+	def.bodyA = b;
+	def.bodyB = circle;
 
-	spring_joint = (b2PrismaticJoint*)world->CreateJoint(&jointDef);
+	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot_1), PIXEL_TO_METERS(y_pivot_1));
+	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot_2), PIXEL_TO_METERS(y_pivot_2));
+
+	def.dampingRatio = damping; // 0 ... 1
+	def.frequencyHz = frequency; // < 30.0f
+
+	(b2DistanceJoint*)world->CreateJoint(&def);
+
+	//b2Vec2 vec(b->GetPosition());
+
+	//b2PrismaticJointDef jointDef;
+	//b2Vec2 worldAxis(1.0f, 0.0f);
+	//jointDef.bodyA = ground;
+	//jointDef.bodyB = b;
+	//jointDef.localAnchorA.Set(vec.x, vec.y);
+	//jointDef.localAxisA.Set(0, -1);
+	//jointDef.lowerTranslation = -1.0f;
+	//jointDef.upperTranslation = 1.0f;
+	//jointDef.enableLimit = true;
+	//jointDef.maxMotorForce = 20.0f;
+	//jointDef.motorSpeed = 20.0f;
+	//jointDef.enableMotor = true;
+
+	//(b2PrismaticJoint*)world->CreateJoint(&jointDef);
 
 	return ret;
 }
@@ -768,26 +698,6 @@ void ModulePhysics::BeginContact(b2Contact* contact)
 		physB->listener->OnCollision(physB, physA);
 }
 
-void ModulePhysics::RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, int y_pivot1, int x_pivot2, int y_pivot2, int max_angle, int min_angle)
-{
-
-	b2RevoluteJointDef def;
-	//def.Initialize(body1->body, body2->body, PIXEL_TO_METERS(body1->body->GetWorldCenter()));
-
-	def.bodyA = body1->body;
-	def.bodyB = body2->body;
-	def.collideConnected = false;
-
-	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot1), PIXEL_TO_METERS(y_pivot1));
-	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot2), PIXEL_TO_METERS(y_pivot2));
-
-	def.enableLimit = true; 
-	def.upperAngle = DEGTORAD * max_angle;
-	def.lowerAngle = DEGTORAD * min_angle;
-	
-
-	m_joint = (b2RevoluteJoint*) world->CreateJoint(&def);
-}
 
 void PhysBody::Turn(int degrees)
 {
@@ -804,18 +714,4 @@ double PhysBody::GetAngle()const
 	return RADTODEG * body->GetAngle();
 }
 
-void ModulePhysics::LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1, int y_pivot1, int x_pivot2, int y_pivot2, float frequency, float damping)
-{
-	b2DistanceJointDef def;
-	def.bodyA = body1->body;
-	def.bodyB = body2->body;
-
-	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot1), PIXEL_TO_METERS(y_pivot1));
-	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot2), PIXEL_TO_METERS(y_pivot2));
-
-	def.dampingRatio = damping;
-	def.frequencyHz = frequency;
-
-	dis_joint= (b2DistanceJoint*) world->CreateJoint(&def);
-}
 
