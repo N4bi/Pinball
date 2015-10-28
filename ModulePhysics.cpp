@@ -70,7 +70,7 @@ bool ModulePhysics::Start()
 // 
 update_status ModulePhysics::PreUpdate()
 {
-	world->Step(1/90.0f, 6, 2);
+	world->Step(1/60.0f, 6, 2);
 
 	for(b2Contact* c = world->GetContactList(); c; c = c->GetNext())
 	{
@@ -172,6 +172,7 @@ PhysBody* ModulePhysics::CreateRectangle(const SDL_Rect& rect)
 	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
 
 	b2Body* b = world->CreateBody(&body);
+
 	b2PolygonShape box;
 
 	box.SetAsBox(PIXEL_TO_METERS(rect.w/2), PIXEL_TO_METERS(rect.h/2));
@@ -368,15 +369,15 @@ PhysBody* ModulePhysics::AddFlipper(SDL_Texture* texture)
 	revolute_joint_def.collideConnected = false;
 	revolute_joint_def.enableLimit = true;
 	revolute_joint_def.enableMotor = true;
-	revolute_joint_def.motorSpeed = .0f;
-	revolute_joint_def.maxMotorTorque = 60.0f;
+	revolute_joint_def.motorSpeed = 0.0f;
+	revolute_joint_def.maxMotorTorque = 1000.0f;
 	
 
 	revolute_joint_def.lowerAngle = -30.0f * DEGTORAD;
 	revolute_joint_def.upperAngle = 50.0f * DEGTORAD;
 	
 	
-	revolute_joint_def.localAnchorA.Set(PIXEL_TO_METERS(-20), PIXEL_TO_METERS(0));
+	revolute_joint_def.localAnchorA.Set(PIXEL_TO_METERS(-25), PIXEL_TO_METERS(0));
 	revolute_joint_def.localAnchorB.Set(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0));
 
 	m_joint = (b2RevoluteJoint*)world->CreateJoint(&revolute_joint_def);
@@ -425,7 +426,7 @@ PhysBody* ModulePhysics::CreateFlipper(const SDL_Rect& rect, int* points, uint s
 
 }
 
-PhysBody*ModulePhysics::AddSpring(int x, int y, SDL_Texture* texture)
+PhysBody* ModulePhysics::AddSpring(int x, int y, SDL_Texture* texture)
 {
 	b2BodyDef body;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
@@ -450,6 +451,8 @@ PhysBody*ModulePhysics::AddSpring(int x, int y, SDL_Texture* texture)
 	ret->texture = texture;
 	ret->width = width * 0.5f;
 	ret->height = height * 0.5f;
+
+	//JOINT
 
 	b2Vec2 vec(b->GetPosition());
 
@@ -598,11 +601,8 @@ update_status ModulePhysics::PostUpdate()
 	// TODO 4: If the player releases the mouse button, destroy the joint
 	if (mouse_joint != NULL && App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_UP)
 	{
-		if (mouse_joint != NULL)
-		{
 			world->DestroyJoint(mouse_joint);
 			mouse_joint = NULL;
-		}
 	}
 
 

@@ -72,8 +72,7 @@ public:
 	void DestroyBody(PhysBody* body);
 
 	void Turn(int degrees);
-	b2PrismaticJoint* spring_joint;
-	b2RevoluteJoint* m_joint;
+
 
 private:
 
@@ -90,5 +89,10 @@ private:
 	float32 time_step;
 	int32 velocity_iter;
 	int32 position_iter;
+
+public:
+
+	b2PrismaticJoint* spring_joint;
+	b2RevoluteJoint* m_joint;
 	
 };

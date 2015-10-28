@@ -267,8 +267,8 @@ update_status ModuleSceneIntro::Update()
 	App->renderer->Blit(table, 0, 0);
 
 	int x, y;
-	//flipper1->GetPosition(x, y);
-	//App->renderer->Blit(flipper_texture, x, y);
+	flipper1->GetPosition(x, y);
+	App->renderer->Blit(flipper_texture, x, y);
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
@@ -343,23 +343,23 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
-		App->physics->m_joint->SetMotorSpeed(30.0f);
+		App->physics->m_joint->SetMotorSpeed(1000.0f);
 		
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_UP)
 	{
-		App->physics->m_joint->SetMotorSpeed(-30.0f);
+		App->physics->m_joint->SetMotorSpeed(-1000.0f);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_DOWN) || App->input->GetKey(SDL_SCANCODE_DOWN == KEY_REPEAT))
 	{
-		App->physics->spring_joint->SetMotorSpeed(20.0f);
+		App->physics->spring_joint->SetMotorSpeed(-20.0f);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_UP))
 	{
-		App->physics->spring_joint->SetMotorSpeed(-20.0f);
+		App->physics->spring_joint->SetMotorSpeed(20.0f);
 	}
 
 	// Prepare for raycast ------------------------------------------------------
@@ -441,7 +441,8 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 
 	App->audio->PlayFx(bonus_fx);
 
-	/*
+	
+
 	if(bodyA)
 	{
 		bodyA->GetPosition(x, y);
@@ -452,5 +453,5 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	{
 		bodyB->GetPosition(x, y);
 		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
-	}*/
+	}
 }
