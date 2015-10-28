@@ -183,37 +183,6 @@ bool ModuleSceneIntro::Start()
 	};
 
 	int flipper[16] = {
-	/*	36, 46,
-		48, 53,
-		52, 55,
-		57, 55,
-		61, 51,
-		62, 46,
-		61, 41,
-		53, 33,
-		21, 3,
-		14, 1,
-		8, 3,
-		4, 8,
-		1, 14,
-		2, 22,
-		3, 27,
-		10, 31,
-		34, 45*/
-
-	/*	186, 950,
-		195, 950,
-		201, 953,
-		213, 965,
-		238, 989,
-		239, 995,
-		238, 1002,
-		232, 1005,
-		222, 1000,
-		182, 978,
-		178, 968,
-		179, 959,
-		184, 952*/
 
 		9, 2,
 		22, 3,
@@ -246,11 +215,10 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
 	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
 
-	//flipper1 = App->physics->AddFlipper(flipper_texture);
 	flipper1 = App->physics->CreateFlipper(177, 953, 177 + 16, 953 + 16, flipper, 16, 16, 16, 0, 0, 0.0f, 80.0f, 1.0f, 0.0f, false, false, flipper_texture);
 	flipper2 = App->physics->CreateFlipper(280, 953, 350-16, 953+16 , flipper_right, 16, 45, 16, 0, 0, -80.0f,0.0f, 1.0f, 0.0f, false, false, flipperDR_texture);
 
-	spring = App->physics->AddSpring(515, 980, 490, 884, 0, 0, 0, 0, 0.5f, 4.0f, spring_texture);
+	spring = App->physics->AddSpring(515, 980,spring_texture);
 
 
 	

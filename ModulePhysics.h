@@ -65,7 +65,7 @@ public:
 
 
 	PhysBody* AddWall(int x, int y, int* points, int size);
-	PhysBody* AddSpring(int x_box, int y_box, int x_circle,int y_circle,int x_pivot_1,int x_pivot_2,int y_pivot_1,int y_pivot_2, float damping, float frequency, SDL_Texture*);
+	PhysBody* AddSpring(int x_box, int y_box, SDL_Texture*);
 
 	void RevoluteJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 , int y_pivot1 , int x_pivot2 , int y_pivot2 , int max_angle, int min_angle);
 	void LineJoint(PhysBody* body1, PhysBody* body2, int x_pivot1 = 0, int y_pivot1 = 0, int x_pivot2 = 0, int y_pivot2 = 0, float frequency = 10.0f, float damping = 0.5f);

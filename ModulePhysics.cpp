@@ -398,23 +398,11 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 
 }
 
-PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, int x_circle, int y_circle, int x_pivot_1, int x_pivot_2, int y_pivot_1, int y_pivot_2, float damping, float frequency, SDL_Texture* texture)
+PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture)
 {
-	b2Vec2 circle_pos(x_circle, y_circle);
+
 	b2Vec2 box_pos(x_box,y_box);
-	int radius = 5;
 
-	b2BodyDef circle_def;
-	circle_def.position.Set(PIXEL_TO_METERS(circle_pos.x), PIXEL_TO_METERS(circle_pos.y));
-	circle_def.type = b2_staticBody;
-	b2Body* circle = world->CreateBody(&circle_def);
-
-	b2CircleShape circle_shape;
-	circle_shape.m_radius = PIXEL_TO_METERS(radius);
-
-	b2FixtureDef circle_fixture;
-	circle_fixture.shape = &circle_shape;
-	circle->CreateFixture(&circle_fixture);
 
 	b2BodyDef body;
 	body.position.Set(PIXEL_TO_METERS(box_pos.x), PIXEL_TO_METERS(box_pos.y));
@@ -429,7 +417,6 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, int x_circle, int y_cir
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
 	fixture.friction = 0.0f;
-	//fixture.restitution = 1.0f;
 
 	b->CreateFixture(&fixture);
 
