@@ -36,6 +36,7 @@ public:
 	b2Body* body;
 	Module* listener;
 	SDL_Texture* texture;
+	
 
 private:
 	SDL_Rect rect;
@@ -80,9 +81,6 @@ private:
 	bool debug;
 	b2World* world;
 	b2MouseJoint* mouse_joint;
-
-	b2DistanceJoint* dis_joint;
-	
 	b2Body* ground;
 	b2Body* click_body;
 	p2List<PhysBody*> bodies;
@@ -93,6 +91,6 @@ private:
 
 public:
 
-	b2PrismaticJoint* spring_joint;
+	
 	
 };

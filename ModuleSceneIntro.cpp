@@ -250,7 +250,7 @@ bool ModuleSceneIntro::Start()
 	flipper1 = App->physics->CreateFlipper(177, 953, 177 + 16, 953 + 16, flipper, 16, 16, 16, 0, 0, 0.0f, 80.0f, 1.0f, 0.0f, false, false, flipper_texture);
 	flipper2 = App->physics->CreateFlipper(280, 953, 350-16, 953+16 , flipper_right, 16, 45, 16, 0, 0, -80.0f,0.0f, 1.0f, 0.0f, false, false, flipperDR_texture);
 
-	spring = App->physics->AddSpring(515, 980, 490, 884, 0, 0, 0, 0, 1.0f, 20.0f, spring_texture);
+	spring = App->physics->AddSpring(515, 980, 490, 884, 0, 0, 0, 0, 0.5f, 4.0f, spring_texture);
 
 
 	
@@ -374,13 +374,14 @@ update_status ModuleSceneIntro::Update()
 		flipper2->Turn(-360);
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_DOWN) || App->input->GetKey(SDL_SCANCODE_DOWN == KEY_REPEAT))
+	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
 	{
-		spring_push += 175.0f;
+		spring_push += 175.0f/5.0f;
 		spring->Push(0, spring_push);
+		
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_DOWN == KEY_UP))
+	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_UP)
 	{
 		spring_push = 0.0f;
 	}

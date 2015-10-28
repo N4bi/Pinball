@@ -419,18 +419,17 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, int x_circle, int y_cir
 	b2BodyDef body;
 	body.position.Set(PIXEL_TO_METERS(box_pos.x), PIXEL_TO_METERS(box_pos.y));
 	body.type = b2_dynamicBody;
-
 	b2Body* b = world->CreateBody(&body);
 
 	b2PolygonShape shape;
-
-	int width = 16, height = 31;
-
+	int width = 15, height = 25;
 	shape.SetAsBox(PIXEL_TO_METERS(width)*0.5f, PIXEL_TO_METERS(height)*0.5f);
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
+	fixture.friction = 0.0f;
+	//fixture.restitution = 1.0f;
 
 	b->CreateFixture(&fixture);
 
@@ -443,35 +442,21 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, int x_circle, int y_cir
 
 	//JOINT
 
-	b2DistanceJointDef def;
+	b2Vec2 vec(b->GetPosition());
 
-	def.bodyA = b;
-	def.bodyB = circle;
+	b2PrismaticJointDef jointDef;
+	b2Vec2 worldAxis(0.0f, -1.0f);
 
-	def.localAnchorA.Set(PIXEL_TO_METERS(x_pivot_1), PIXEL_TO_METERS(y_pivot_1));
-	def.localAnchorB.Set(PIXEL_TO_METERS(x_pivot_2), PIXEL_TO_METERS(y_pivot_2));
+	jointDef.Initialize(ground, b, vec, worldAxis);
+	jointDef.lowerTranslation = -1.5f;
+	jointDef.upperTranslation = 1.5f;
+	jointDef.enableLimit = true;
+	jointDef.maxMotorForce = 20.0f;
+	jointDef.motorSpeed = 20.0f;
+	jointDef.enableMotor = true;
 
-	def.dampingRatio = damping; // 0 ... 1
-	def.frequencyHz = frequency; // < 30.0f
 
-	(b2DistanceJoint*)world->CreateJoint(&def);
-
-	//b2Vec2 vec(b->GetPosition());
-
-	//b2PrismaticJointDef jointDef;
-	//b2Vec2 worldAxis(1.0f, 0.0f);
-	//jointDef.bodyA = ground;
-	//jointDef.bodyB = b;
-	//jointDef.localAnchorA.Set(vec.x, vec.y);
-	//jointDef.localAxisA.Set(0, -1);
-	//jointDef.lowerTranslation = -1.0f;
-	//jointDef.upperTranslation = 1.0f;
-	//jointDef.enableLimit = true;
-	//jointDef.maxMotorForce = 20.0f;
-	//jointDef.motorSpeed = 20.0f;
-	//jointDef.enableMotor = true;
-
-	//(b2PrismaticJoint*)world->CreateJoint(&jointDef);
+	(b2PrismaticJoint*)world->CreateJoint(&jointDef);
 
 	return ret;
 }
@@ -706,7 +691,9 @@ void PhysBody::Turn(int degrees)
 
 void PhysBody::Push(float x, float y)
 {
+	//body->ApplyLinearImpulse(b2Vec2(x, y), body->GetLocalCenter(), true);
 	body->ApplyForceToCenter(b2Vec2(x, y), true);
+
 }
 
 double PhysBody::GetAngle()const
