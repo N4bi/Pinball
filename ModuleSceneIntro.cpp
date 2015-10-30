@@ -36,12 +36,14 @@ bool ModuleSceneIntro::Start()
 	flipperUR_texture = App->textures->Load("Game/pinball/flipperUp_right.png");
 	spring_texture = App->textures->Load("Game/pinball/spring.png");
 	
-
 	bonus_fx = App->audio->LoadFx("Game/pinball/bonus.wav");
 
 	
 	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 	
+/////////////////////////////////////////////////////////////////
+
+	// Table vertex
 
 	int triangle_right[44] = {
 		343, 944,
@@ -184,6 +186,192 @@ bool ModuleSceneIntro::Start()
 		172, 1023
 	};
 
+	int mid_triangle_left[12] = {
+		87, 418,
+		87, 565,
+		116, 520,
+		95, 480,
+		111, 466,
+		89, 420
+	};
+
+	int mid_triangle_right[18] = {
+		483, 643,
+		508, 657,
+		521, 643,
+		533, 639,
+		534, 518,
+		528, 518,
+		497, 584,
+		514, 597,
+		487, 643
+	};
+
+	int rectangle_up_left[14] = {
+		310, 172,
+		317, 188,
+		353, 211,
+		344, 225,
+		309, 205,
+		297, 178,
+		307, 172
+	};
+
+	int rectangle_up_right[18] = {
+		525, 176,
+		520, 185,
+		515, 190,
+		480, 211,
+		490, 226,
+		526, 206,
+		536, 182,
+		530, 165,
+		526, 174
+	};
+
+	int triangle_up_left[20] = {
+		295, 166,
+		287, 161,
+		249, 76,
+		252, 66,
+		268, 56,
+		278, 33,
+		300, 33,
+		303, 39,
+		303, 155,
+		299, 163
+	};
+
+	int triangle2_up_left[8] = {
+		360, 35,
+		308, 82,
+		308, 35,
+		358, 35
+	};
+
+	int tunnel_wall_right[66] = {
+		179, 124,
+		175, 120,
+		174, 104,
+		166, 85,
+		146, 70,
+		126, 68,
+		105, 76,
+		91, 90,
+		81, 112,
+		80, 140,
+		85, 568,
+		88, 576,
+		88, 584,
+		106, 607,
+		113, 623,
+		113, 728,
+		109, 733,
+		104, 730,
+		104, 627,
+		98, 613,
+		80, 589,
+		78, 581,
+		72, 140,
+		72, 111,
+		75, 96,
+		85, 81,
+		101, 67,
+		125, 60,
+		145, 62,
+		162, 72,
+		175, 87,
+		184, 107,
+		184, 123
+	};
+
+	int tunnel_wall_left[76] = {
+		230, 117,
+		228, 112,
+		227, 94,
+		213, 68,
+		185, 46,
+		168, 38,
+		144, 32,
+		126, 31,
+		103, 34,
+		77, 49,
+		61, 64,
+		46, 95,
+		44, 109,
+		46, 579,
+		51, 597,
+		60, 613,
+		70, 626,
+		73, 635,
+		72, 728,
+		68, 733,
+		62, 728,
+		63, 639,
+		60, 628,
+		52, 617,
+		41, 600,
+		35, 580,
+		36, 108,
+		40, 90,
+		58, 61,
+		79, 41,
+		103, 28,
+		126, 24,
+		145, 24,
+		171, 31,
+		193, 43,
+		218, 65,
+		233, 90,
+		235, 116
+	};
+
+	int multi_ball_stuff[46] = {
+		90, 259,
+		109, 204,
+		102, 183,
+		109, 179,
+		113, 190,
+		163, 162,
+		156, 154,
+		159, 147,
+		156, 143,
+		165, 135,
+		170, 126,
+		172, 109,
+		163, 90,
+		153, 80,
+		134, 74,
+		120, 77,
+		106, 85,
+		93, 106,
+		81, 112,
+		81, 119,
+		88, 139,
+		85, 144,
+		85, 258
+	};
+
+	int bouncer_left[12] = {
+		112, 771,
+		125, 767,
+		177, 855,
+		167, 864,
+		117, 840,
+		112, 775
+	};
+
+	int bouncer_right[12] = {
+		353, 854,
+		362, 864,
+		412, 839,
+		419, 775,
+		404, 770,
+		355, 849
+	};
+
+	//Flipper vertex
+
 	int flipper_down_left[16] = {
 
 		9, 2,
@@ -195,8 +383,6 @@ bool ModuleSceneIntro::Start()
 		0, 14,
 		6, 4
 	};
-
-
 
 	int flipper_down_right[16] = {
 		
@@ -232,27 +418,44 @@ bool ModuleSceneIntro::Start()
 		40, 3
 	};
 
-	//Walls
+/////////////////////////////////////////////////////////////////
+
+	//Walls & Bouncers
 	walls.add(App->physics->AddWall(0, 0, table, 70));
+
 	walls.add(App->physics->AddWall(0, 0, triangle_right, 44));
 	walls.add(App->physics->AddWall(0, 0, launcher, 90));
-	
 	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
 	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
+	walls.add(App->physics->AddWall(0, 0, mid_triangle_left, 12));
+	walls.add(App->physics->AddWall(0, 0, mid_triangle_right, 18));
+	walls.add(App->physics->AddWall(0, 0, rectangle_up_left, 14));
+	walls.add(App->physics->AddWall(0, 0, rectangle_up_right, 18));
+	walls.add(App->physics->AddWall(0, 0, triangle_up_left, 20));
+	walls.add(App->physics->AddWall(0, 0, triangle2_up_left, 8));
+	walls.add(App->physics->AddWall(0, 0, tunnel_wall_right, 66));
+	walls.add(App->physics->AddWall(0, 0, tunnel_wall_left, 76));
+	walls.add(App->physics->AddWall(0, 0, multi_ball_stuff, 46));
+	walls.add(App->physics->AddWall(0, 0, bouncer_left, 12));
+	walls.add(App->physics->AddWall(0, 0, bouncer_right, 12));
+
+
+
 
 	//Flippers & Spring
 	flipperDL = App->physics->CreateFlipper(177, 953, 177 + 16, 953 + 16, flipper_down_left, 16, 16, 16, 0, 0, 0.0f, 80.0f, 1.0f, 0.0f, false, false, flipperDL_texture);
 	flipperDR = App->physics->CreateFlipper(280, 953, 350-16, 953+16, flipper_down_right, 16, 46, 16, 0, 0, -80.0f,0.0f, 1.0f, 0.0f, false, false, flipperDR_texture);
 	flipperUL = App->physics->CreateFlipper(355, 213, 355 + 12, 213 + 16, flipperUp_left, 16, 16, 16, 0, 0, 0.0f, 60.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
 	flipperUR = App->physics->CreateFlipper(475, 213, 475-10 , 213 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
-	flipperML = App->physics->CreateFlipper(115, 469, 115 + 12, 469 + 16, flipperUp_left, 16, 16, 16, 0, 0, 0.0f, 60.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
-	//flipperMR = App->physics->CreateFlipper(475, 213, 475 - 10, 213 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
-
-
-
+	flipperML = App->physics->CreateFlipper(115, 469, 115, 469+10, flipperUp_left, 16, 10, 10, 0, 0, -28.0f, 30.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
+	flipperMR = App->physics->CreateFlipper(489, 589, 489, 589 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
 	spring = App->physics->AddSpring(515, 980,spring_texture);
 
+	// Other stuff
 
+
+
+///////////////////////////////////////////////////////////////
 	
 	return ret;
 }
@@ -269,6 +472,8 @@ bool ModuleSceneIntro::CleanUp()
 update_status ModuleSceneIntro::Update()
 { 
 	float spring_push = 0.0f;
+
+	//Draw stuff
 
 	App->renderer->Blit(table, 0, 0);
 
@@ -288,15 +493,15 @@ update_status ModuleSceneIntro::Update()
 	flipperML->GetPosition(x, y);
 	App->renderer->Blit(flipperUL_texture, x, y, NULL, 1.0f, flipperML->GetAngle(), 0, 0);
 
-	//flipperMR->GetPosition(x, y);
-	//App->renderer->Blit(flipperUR_texture, x, y, NULL, 1.0f, flipperMR->GetAngle(), 0, 0);
+	flipperMR->GetPosition(x, y);
+	App->renderer->Blit(flipperUR_texture, x, y, NULL, 1.0f, flipperMR->GetAngle(), 0, 0);
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
 
+///////////////////////////////////////////////////////////////
 
-
-
+	//Key stuff
 
 	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
@@ -314,47 +519,6 @@ update_status ModuleSceneIntro::Update()
 	if(App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
 	{
 		boxes.add(App->physics->CreateRectangle(App->input->GetMouseX(), App->input->GetMouseY(), 100, 50));
-	}
-
-	if(App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
-	{
-		// Pivot 0, 0
-		int rick_head[64] = {
-			14, 36,
-			42, 40,
-			40, 0,
-			75, 30,
-			88, 4,
-			94, 39,
-			111, 36,
-			104, 58,
-			107, 62,
-			117, 67,
-			109, 73,
-			110, 85,
-			106, 91,
-			109, 99,
-			103, 104,
-			100, 115,
-			106, 121,
-			103, 125,
-			98, 126,
-			95, 137,
-			83, 147,
-			67, 147,
-			53, 140,
-			46, 132,
-			34, 136,
-			38, 126,
-			23, 123,
-			30, 114,
-			10, 102,
-			29, 90,
-			0, 75,
-			30, 62
-		};
-
-		ricks.add(App->physics->CreateChain(App->input->GetMouseX(), App->input->GetMouseY(), rick_head, 64));
 	}
 
 
@@ -383,6 +547,7 @@ update_status ModuleSceneIntro::Update()
 	{
 		flipperDR->Turn(360);
 		flipperUR->Turn(360);
+		flipperMR->Turn(360);
 
 	}
 
@@ -390,6 +555,7 @@ update_status ModuleSceneIntro::Update()
 	{
 		flipperDR->Turn(-360);
 		flipperUR->Turn(-360);
+		flipperMR->Turn(-360);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
@@ -484,16 +650,4 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	App->audio->PlayFx(bonus_fx);
 
 	
-
-	if(bodyA)
-	{
-		bodyA->GetPosition(x, y);
-		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
-	}
-
-	if(bodyB)
-	{
-		bodyB->GetPosition(x, y);
-		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
-	}
 }
