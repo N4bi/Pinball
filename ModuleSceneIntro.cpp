@@ -30,8 +30,10 @@ bool ModuleSceneIntro::Start()
 	rick = App->textures->Load("Game/pinball/rick_head.png");
 	ball = App->textures->Load("Game/pinball/ball.png");
 	table = App->textures->Load("Game/pinball/ground3.png");
-	flipper_texture = App->textures->Load("Game/pinball/flipper.png");
+	flipperDL_texture = App->textures->Load("Game/pinball/flipper.png");
 	flipperDR_texture = App->textures->Load("Game/pinball/flipper_right.png");
+	flipperUL_texture = App->textures->Load("Game/pinball/flipperUp_left.png");
+	flipperUR_texture = App->textures->Load("Game/pinball/flipperUp_right.png");
 	spring_texture = App->textures->Load("Game/pinball/spring.png");
 	
 
@@ -182,7 +184,7 @@ bool ModuleSceneIntro::Start()
 		172, 1023
 	};
 
-	int flipper[16] = {
+	int flipper_down_left[16] = {
 
 		9, 2,
 		22, 3,
@@ -196,7 +198,7 @@ bool ModuleSceneIntro::Start()
 
 
 
-	int flipper_right[16] = {
+	int flipper_down_right[16] = {
 		
 		2, 43,
 		41, 2,
@@ -208,6 +210,29 @@ bool ModuleSceneIntro::Start()
 		0, 47
 	};
 
+	int flipperUp_left[16] = {
+		8, 1,
+		15, 1,
+		44, 31,
+		44, 40,
+		35, 40,
+		2, 20,
+		1, 11,
+		6, 2
+	};
+
+	int flipperUp_right[16] = {
+		38, 1,
+		30, 1,
+		1, 31,
+		3, 39,
+		10, 41,
+		45, 20,
+		45, 8,
+		40, 3
+	};
+
+	//Walls
 	walls.add(App->physics->AddWall(0, 0, table, 70));
 	walls.add(App->physics->AddWall(0, 0, triangle_right, 44));
 	walls.add(App->physics->AddWall(0, 0, launcher, 90));
@@ -215,8 +240,15 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
 	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
 
-	flipper1 = App->physics->CreateFlipper(177, 953, 177 + 16, 953 + 16, flipper, 16, 16, 16, 0, 0, 0.0f, 80.0f, 1.0f, 0.0f, false, false, flipper_texture);
-	flipper2 = App->physics->CreateFlipper(280, 953, 350-16, 953+16 , flipper_right, 16, 45, 16, 0, 0, -80.0f,0.0f, 1.0f, 0.0f, false, false, flipperDR_texture);
+	//Flippers & Spring
+	flipperDL = App->physics->CreateFlipper(177, 953, 177 + 16, 953 + 16, flipper_down_left, 16, 16, 16, 0, 0, 0.0f, 80.0f, 1.0f, 0.0f, false, false, flipperDL_texture);
+	flipperDR = App->physics->CreateFlipper(280, 953, 350-16, 953+16, flipper_down_right, 16, 46, 16, 0, 0, -80.0f,0.0f, 1.0f, 0.0f, false, false, flipperDR_texture);
+	flipperUL = App->physics->CreateFlipper(355, 213, 355 + 12, 213 + 16, flipperUp_left, 16, 16, 16, 0, 0, 0.0f, 60.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
+	flipperUR = App->physics->CreateFlipper(475, 213, 475-10 , 213 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
+	flipperML = App->physics->CreateFlipper(115, 469, 115 + 12, 469 + 16, flipperUp_left, 16, 16, 16, 0, 0, 0.0f, 60.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
+	//flipperMR = App->physics->CreateFlipper(475, 213, 475 - 10, 213 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
+
+
 
 	spring = App->physics->AddSpring(515, 980,spring_texture);
 
@@ -241,11 +273,23 @@ update_status ModuleSceneIntro::Update()
 	App->renderer->Blit(table, 0, 0);
 
 	int x, y;
-	flipper1->GetPosition(x, y);
-	App->renderer->Blit(flipper_texture, x, y, NULL, 1.0f, flipper1->GetAngle(), 0, 0);
+	flipperDL->GetPosition(x, y);
+	App->renderer->Blit(flipperDL_texture, x, y, NULL, 1.0f, flipperDL->GetAngle(), 0, 0);
 
-	flipper2->GetPosition(x, y);
-	App->renderer->Blit(flipperDR_texture, x, y, NULL, 1.0f, flipper2->GetAngle(), 0, 0);
+	flipperDR->GetPosition(x, y);
+	App->renderer->Blit(flipperDR_texture, x, y, NULL, 1.0f, flipperDR->GetAngle(), 0, 0);
+
+	flipperUL->GetPosition(x, y);
+	App->renderer->Blit(flipperUL_texture, x, y, NULL, 1.0f, flipperUL->GetAngle(), 0, 0);
+	
+	flipperUR->GetPosition(x, y);
+	App->renderer->Blit(flipperUR_texture, x, y, NULL, 1.0f, flipperUR->GetAngle(), 0, 0);
+
+	flipperML->GetPosition(x, y);
+	App->renderer->Blit(flipperUL_texture, x, y, NULL, 1.0f, flipperML->GetAngle(), 0, 0);
+
+	//flipperMR->GetPosition(x, y);
+	//App->renderer->Blit(flipperUR_texture, x, y, NULL, 1.0f, flipperMR->GetAngle(), 0, 0);
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
@@ -322,24 +366,30 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
-		flipper1->Turn(-360);
+		flipperDL->Turn(-360);
+		flipperUL->Turn(-360);
+		flipperML->Turn(-360);
 		
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_UP)
 	{
-		flipper1->Turn(360);
+		flipperDL->Turn(360);
+		flipperUL->Turn(360);
+		flipperML->Turn(360);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 	{
-		flipper2->Turn(360);
+		flipperDR->Turn(360);
+		flipperUR->Turn(360);
 
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_UP)
 	{
-		flipper2->Turn(-360);
+		flipperDR->Turn(-360);
+		flipperUR->Turn(-360);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
