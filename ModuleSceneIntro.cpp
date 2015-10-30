@@ -24,6 +24,7 @@ bool ModuleSceneIntro::Start()
 	bool ret = true;
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
+	App->audio->PlayMusic("Game/pinball/sounds/music_pinball.ogg");
 
 	circle = App->textures->Load("Game/pinball/wheel.png"); 
 	box = App->textures->Load("Game/pinball/crate.png");
@@ -37,6 +38,9 @@ bool ModuleSceneIntro::Start()
 	spring_texture = App->textures->Load("Game/pinball/spring.png");
 	
 	bonus_fx = App->audio->LoadFx("Game/pinball/bonus.wav");
+	flipper_fx = App->audio->LoadFx("Game/pinball/sounds/flipper.wav");
+	spring_down_fx = App->audio->LoadFx("Game/pinball/sounds/spring_down.wav");
+	spring_up_fx = App->audio->LoadFx("Game/pinball/sounds/spring_up.wav");
 
 	
 	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
@@ -70,52 +74,51 @@ bool ModuleSceneIntro::Start()
 		347, 941
 	};
 
-	int launcher[90] = {
-		351, 1022,
-		371, 1006,
-		488, 944,
-		490, 766,
-		489, 753,
-		482, 733,
-		470, 712,
-		456, 698,
-		440, 690,
-		440, 685,
-		445, 676,
-		461, 684,
-		467, 691,
-		478, 702,
-		487, 715,
-		494, 730,
-		500, 747,
-		501, 752,
-		502, 765,
-		502, 1022,
-		530, 1022,
-		530, 757,
-		528, 742,
-		526, 733,
-		523, 725,
-		520, 718,
-		514, 705,
-		507, 695,
-		500, 684,
-		489, 673,
-		479, 663,
-		467, 657,
-		455, 652,
-		462, 637,
-		467, 635,
-		478, 641,
-		477, 647,
-		495, 661,
-		515, 683,
-		534, 717,
-		541, 743,
-		543, 774,
-		543, 860,
-		542, 1024,
-		352, 1024
+	int launcher[88] = {
+		354, 1021,
+	368, 1007,
+	489, 942,
+	490, 764,
+	487, 748,
+	482, 734,
+	475, 718,
+	465, 705,
+	456, 696,
+	440, 690,
+	446, 674,
+	454, 678,
+	462, 684,
+	475, 697,
+	484, 710,
+	489, 718,
+	494, 728,
+	497, 738,
+	500, 749,
+	501, 757,
+	501, 764,
+	501, 1022,
+	531, 1022,
+	531, 855,
+	531, 757,
+	530, 748,
+	526, 733,
+	521, 718,
+	515, 706,
+	504, 689,
+	491, 675,
+	479, 663,
+	468, 656,
+	456, 650,
+	461, 640,
+	478, 648,
+	489, 656,
+	502, 668,
+	514, 683,
+	529, 706,
+	537, 728,
+	542, 753,
+	542, 1024,
+	354, 1023
 	};
 
 	int table[70] = {
@@ -423,21 +426,21 @@ bool ModuleSceneIntro::Start()
 	//Walls & Bouncers
 	walls.add(App->physics->AddWall(0, 0, table, 70));
 
-	walls.add(App->physics->AddWall(0, 0, triangle_right, 44));
-	walls.add(App->physics->AddWall(0, 0, launcher, 90));
-	walls.add(App->physics->AddWall(0, 0, triangle_left, 38));
-	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12));
-	walls.add(App->physics->AddWall(0, 0, mid_triangle_left, 12));
-	walls.add(App->physics->AddWall(0, 0, mid_triangle_right, 18));
-	walls.add(App->physics->AddWall(0, 0, rectangle_up_left, 14));
-	walls.add(App->physics->AddWall(0, 0, rectangle_up_right, 18));
-	walls.add(App->physics->AddWall(0, 0, triangle_up_left, 20));
-	walls.add(App->physics->AddWall(0, 0, triangle2_up_left, 8));
-	walls.add(App->physics->AddWall(0, 0, tunnel_wall_right, 66));
-	walls.add(App->physics->AddWall(0, 0, tunnel_wall_left, 76));
-	walls.add(App->physics->AddWall(0, 0, multi_ball_stuff, 46));
-	walls.add(App->physics->AddWall(0, 0, bouncer_left, 12));
-	walls.add(App->physics->AddWall(0, 0, bouncer_right, 12));
+	walls.add(App->physics->AddWall(0, 0, triangle_right, 44,0.4f));
+	walls.add(App->physics->AddWall(0, 0, launcher, 88, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, triangle_left, 38, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, mid_triangle_left, 12, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, mid_triangle_right, 18, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, rectangle_up_left, 14, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, rectangle_up_right, 18, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, triangle_up_left, 20, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, triangle2_up_left, 8, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, tunnel_wall_right, 66, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, tunnel_wall_left, 76, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, multi_ball_stuff, 46, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, bouncer_left, 12, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, bouncer_right, 12, 0.4f));
 
 
 
@@ -448,7 +451,7 @@ bool ModuleSceneIntro::Start()
 	flipperUL = App->physics->CreateFlipper(355, 213, 355 + 12, 213 + 16, flipperUp_left, 16, 16, 16, 0, 0, 0.0f, 60.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
 	flipperUR = App->physics->CreateFlipper(475, 213, 475-10 , 213 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
 	flipperML = App->physics->CreateFlipper(115, 469, 115, 469+10, flipperUp_left, 16, 10, 10, 0, 0, -28.0f, 30.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
-	flipperMR = App->physics->CreateFlipper(489, 589, 489, 589 + 16, flipperUp_right, 16, 30, 16, 0, 0, -60.0f, 0.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
+	flipperMR = App->physics->CreateFlipper(489, 589, 489, 589 + 10, flipperUp_right, 16, 37, 13, 0, 0, -40.0f, 15.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
 	spring = App->physics->AddSpring(515, 980,spring_texture);
 
 	// Other stuff
@@ -530,6 +533,10 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 	{
+		if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_DOWN)
+		{
+			App->audio->PlayFx(flipper_fx);
+		}
 		flipperDL->Turn(-360);
 		flipperUL->Turn(-360);
 		flipperML->Turn(-360);
@@ -545,6 +552,11 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 	{
+		if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN)
+		{
+			App->audio->PlayFx(flipper_fx);
+		}
+
 		flipperDR->Turn(360);
 		flipperUR->Turn(360);
 		flipperMR->Turn(360);
@@ -560,6 +572,11 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
 	{
+		if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN)
+		{
+			App->audio->PlayFx(spring_down_fx);
+		}
+
 		spring_push += 175.0f/5.0f;
 		spring->Push(0, spring_push);
 		
@@ -567,6 +584,7 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_UP)
 	{
+		App->audio->PlayFx(spring_up_fx);
 		spring_push = 0.0f;
 	}
 
@@ -647,7 +665,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
 	int x, y;
 
-	App->audio->PlayFx(bonus_fx);
+	//App->audio->PlayFx(bonus_fx);
 
 	
 }

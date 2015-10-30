@@ -48,6 +48,9 @@ public:
 	SDL_Texture* flipperUR_texture;
 	SDL_Texture* spring_texture;
 	uint bonus_fx;
+	uint flipper_fx;
+	uint spring_down_fx;
+	uint spring_up_fx;
 	p2Point<int> ray;
 	bool ray_on;
 };

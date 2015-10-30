@@ -237,41 +237,8 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size)
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateChainStatic(int x, int y, int* points, int size)
-{
-	b2BodyDef body;
-	body.type = b2_staticBody;
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
-	b2Body* b = world->CreateBody(&body);
-
-	b2ChainShape shape;
-	b2Vec2* p = new b2Vec2[size / 2];
-
-	for (uint i = 0; i < size / 2; ++i)
-	{
-		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
-		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
-	}
-
-	shape.CreateLoop(p, size / 2);
-
-	b2FixtureDef fixture;
-	fixture.shape = &shape;
-
-	b->CreateFixture(&fixture);
-
-	delete p;
-
-	PhysBody* pbody = new PhysBody();
-	pbody->body = b;
-	b->SetUserData(pbody);
-	pbody->width = pbody->height = 0;
-
-	return pbody;
-}
-
-PhysBody* ModulePhysics::AddWall(int x, int y, int* points, int size)
+PhysBody* ModulePhysics::AddWall(int x, int y, int* points, int size, float restitution)
 {
 	b2BodyDef body;
 	body.type = b2_staticBody;
@@ -290,7 +257,7 @@ PhysBody* ModulePhysics::AddWall(int x, int y, int* points, int size)
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
-	fixture.restitution = 0.4f;
+	fixture.restitution = restitution;
 
 	b->CreateFixture(&fixture);
 
@@ -380,7 +347,7 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 
 }
 
-PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture)
+PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture,float restitution)
 {
 
 	b2Vec2 box_pos(x_box,y_box);
@@ -399,6 +366,7 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture)
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
 	fixture.friction = 0.0f;
+	fixture.restitution = restitution;
 
 	b->CreateFixture(&fixture);
 
@@ -420,8 +388,8 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture)
 	jointDef.lowerTranslation = -1.5f;
 	jointDef.upperTranslation = 1.5f;
 	jointDef.enableLimit = true;
-	jointDef.maxMotorForce = 20.0f;
-	jointDef.motorSpeed = 20.0f;
+	jointDef.maxMotorForce = 35.0f;
+	jointDef.motorSpeed = 35.0f;
 	jointDef.enableMotor = true;
 
 
