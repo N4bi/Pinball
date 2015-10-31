@@ -42,6 +42,9 @@ bool ModuleSceneIntro::Start()
 	spring_down_fx = App->audio->LoadFx("Game/pinball/sounds/spring_down.wav");
 	spring_up_fx = App->audio->LoadFx("Game/pinball/sounds/spring_up.wav");
 
+
+	ball_start = App->physics->CreateCircle(516, 823, 12);
+
 	
 	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 	
@@ -501,6 +504,9 @@ update_status ModuleSceneIntro::Update()
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
+
+	ball_start->GetPosition(x, y);
+	App->renderer->Blit(ball, x, y, NULL, 1.0f,ball_start->GetRotation());
 
 ///////////////////////////////////////////////////////////////
 
