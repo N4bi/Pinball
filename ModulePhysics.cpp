@@ -17,11 +17,14 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 	world = NULL;
 	mouse_joint = NULL;
 	debug = true;
-
+	time_step = 0.0f;
+	velocity_iter = 0;
+	position_iter = 0.0f;
 }
 
 PhysBody::PhysBody(b2Body* body, const SDL_Rect& rect) : body(body), rect(rect), listener(NULL)
-{}
+{
+}
 
 PhysBody::~PhysBody()
 {
@@ -42,7 +45,7 @@ bool ModulePhysics::Start()
 	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
 	world->SetContactListener(this);
 	
-	// needed to create joints like mouse joint
+	// We need this to create the mouse joint and the prismatic joint
 	b2BodyDef bd;
 	ground = world->CreateBody(&bd);
 
@@ -52,7 +55,11 @@ bool ModulePhysics::Start()
 // 
 update_status ModulePhysics::PreUpdate()
 {
-	world->Step(1/60.0f, 6, 2);
+	time_step = 1.0f / 60.0f;
+	velocity_iter = 6;
+	position_iter = 2;
+
+	world->Step(time_step,velocity_iter, position_iter);
 
 	for(b2Contact* c = world->GetContactList(); c; c = c->GetNext())
 	{
@@ -69,7 +76,6 @@ update_status ModulePhysics::PreUpdate()
 }
 void ModulePhysics::DestroyBody(PhysBody* body)
 {
-	assert(body);
 	bodies.del(bodies.findNode(body));
 	delete body;
 }
@@ -94,6 +100,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 	pbody->body = b;
 	b->SetUserData(pbody);
 	pbody->width = pbody->height = radius;
+	bodies.add(pbody);
 
 	return pbody;
 }
@@ -118,6 +125,7 @@ PhysBody* ModulePhysics::CreateCircleStatic(int x, int y, int radius)
 	pbody->body = b;
 	b->SetUserData(pbody);
 	pbody->width = pbody->height = radius;
+	bodies.add(pbody);
 
 	return pbody;
 }
@@ -143,10 +151,12 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 	b->SetUserData(pbody);
 	pbody->width = width * 0.5f;
 	pbody->height = height * 0.5f;
+	bodies.add(pbody);
 
 	return pbody;
 }
 
+//Create a rectangle with SDL_Rect
 PhysBody* ModulePhysics::CreateRectangle(const SDL_Rect& rect)
 {
 	b2BodyDef body;
@@ -170,11 +180,10 @@ PhysBody* ModulePhysics::CreateRectangle(const SDL_Rect& rect)
 	b->SetUserData(pbody);
 	pbody->width = rect.w/2;
 	pbody->height = rect.h/2;
+	bodies.add(pbody);
 
 	return pbody;
 }
-
-
 
 PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int height)
 {
@@ -199,6 +208,7 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	b->SetUserData(pbody);
 	pbody->width = width;
 	pbody->height = height;
+	bodies.add(pbody);
 
 	return pbody;
 }
@@ -227,12 +237,13 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size)
 
 	b->CreateFixture(&fixture);
 
-	delete p;
+	delete[] p;
 
 	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	b->SetUserData(pbody);
 	pbody->width = pbody->height = 0;
+	bodies.add(pbody);
 
 	return pbody;
 }
@@ -261,16 +272,16 @@ PhysBody* ModulePhysics::AddWall(int x, int y, int* points, int size, float rest
 
 	b->CreateFixture(&fixture);
 
-	delete p;
+	delete[] p;
 
 	PhysBody* pbody = new PhysBody();
 	pbody->body = b;
 	b->SetUserData(pbody);
 	pbody->width = pbody->height = 0;
+	bodies.add(pbody);
 
 	return pbody;
 }
-
 
 PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_pos_x, int pivot_pos_y, int* points, uint size, int anchorA_x, int anchorA_y, int AnchorB_x, int AnchorB_y, float lower_angle, float upper_angle, float density, float restitution, bool ccd, bool isSensor, SDL_Texture* texture)
 {
@@ -279,7 +290,7 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 	b2Vec2 flipper_pos(flipper_pos_x, flipper_pos_y);
 	float radius = 5;
 
-
+	//Create the pivot
 	b2BodyDef circle_def;
 	circle_def.position.Set(PIXEL_TO_METERS(circle_pos.x), PIXEL_TO_METERS(circle_pos.y));
 	circle_def.type = b2_staticBody;
@@ -292,6 +303,7 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 	circle_fixture.shape = &circle_shape;
 	circle->CreateFixture(&circle_fixture);
 
+	//Create the flipper
 	b2BodyDef flipper_def;
 	flipper_def.position.Set(PIXEL_TO_METERS(flipper_pos.x), PIXEL_TO_METERS(flipper_pos.y));
 	flipper_def.type = b2_dynamicBody;
@@ -317,7 +329,7 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 
 	flipper->CreateFixture(&box_fixture);
 
-	delete p;
+	delete[] p;
 
 	PhysBody* ret = new PhysBody();
 	ret->body = flipper;
@@ -325,6 +337,7 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 	ret->texture = texture;
 
 	//JOINT
+	//joint between the flipper and the pivot
 
 	b2RevoluteJointDef revolute_joint_def;
 	revolute_joint_def.bodyA = flipper;
@@ -342,7 +355,7 @@ PhysBody* ModulePhysics::CreateFlipper(int flipper_pos_x, int flipper_pos_y, int
 
 	(b2RevoluteJoint*)world->CreateJoint(&revolute_joint_def);
 
-
+	bodies.add(ret);
 	return ret;
 
 }
@@ -352,7 +365,7 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture,fl
 
 	b2Vec2 box_pos(x_box,y_box);
 
-
+	//Create the box body for the spring
 	b2BodyDef body;
 	body.position.Set(PIXEL_TO_METERS(box_pos.x), PIXEL_TO_METERS(box_pos.y));
 	body.type = b2_dynamicBody;
@@ -378,7 +391,7 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture,fl
 	ret->height = height * 0.5f;
 
 	//JOINT
-
+	//Joint between the box body and the ground
 	b2Vec2 vec(b->GetPosition());
 
 	b2PrismaticJointDef jointDef;
@@ -394,7 +407,7 @@ PhysBody* ModulePhysics::AddSpring(int x_box, int y_box, SDL_Texture* texture,fl
 
 
 	(b2PrismaticJoint*)world->CreateJoint(&jointDef);
-
+	bodies.add(ret);
 	return ret;
 }
 // 
@@ -409,8 +422,6 @@ update_status ModulePhysics::PostUpdate()
 	b2Vec2 mouse_position(0, 0);
 	click_body = NULL;
 
-	// Bonus code: this will iterate all objects in the world and draw the circles
-	// You need to provide your own macro to translate meters to pixels
 	for(b2Body* b = world->GetBodyList(); b; b = b->GetNext())
 	{
 		for(b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
@@ -479,7 +490,7 @@ update_status ModulePhysics::PostUpdate()
 				break;
 			}
 
-			// TODO 1: If mouse button 1 is pressed ...
+			// MOUSE JOINT	
 			if (App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_DOWN)
 			{
 				mouse_position.x = PIXEL_TO_METERS(App->input->GetMouseX());
@@ -487,16 +498,13 @@ update_status ModulePhysics::PostUpdate()
 				if (f->GetShape()->TestPoint(b->GetTransform(), mouse_position) == true)
 				{
 					click_body = f->GetBody();
-					LOG("clickado\n");
+					LOG("body_clicked\n");
 				}
 			}
-			
-
-			
+	
 		}
 	}
-	// TODO 2: If a body was selected, create a mouse joint
-	// using mouse_joint class property
+	// creation of the joint
 	if (click_body != NULL)
 	{
 		b2MouseJointDef def;
@@ -509,8 +517,7 @@ update_status ModulePhysics::PostUpdate()
 
 		mouse_joint = (b2MouseJoint*)world->CreateJoint(&def);
 	}
-	// TODO 3: If the player keeps pressing the mouse button, update
-	// target position and draw a red line between both anchor points
+
 	if (mouse_joint != NULL && App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_REPEAT)
 	{
 		b2Vec2 posA, posB;
@@ -519,10 +526,8 @@ update_status ModulePhysics::PostUpdate()
 		posB.y = PIXEL_TO_METERS(App->input->GetMouseY());
 		mouse_joint->SetTarget(posB);
 
-		App->renderer->DrawLine(METERS_TO_PIXELS(posA.x), METERS_TO_PIXELS(posA.y), METERS_TO_PIXELS(posB.x), METERS_TO_PIXELS(posB.y), 255, 0, 0);
 	}
 
-	// TODO 4: If the player releases the mouse button, destroy the joint
 	if (mouse_joint != NULL && App->input->GetMouseButton(SDL_BUTTON_LEFT) == KEY_UP)
 	{
 			world->DestroyJoint(mouse_joint);
@@ -531,27 +536,6 @@ update_status ModulePhysics::PostUpdate()
 
 
 	return UPDATE_CONTINUE;
-}
-
-
-// Called before quitting
-bool ModulePhysics::CleanUp()
-{
-	LOG("Destroying physics world");
-
-	p2List_item<PhysBody*>* item = bodies.getFirst();
-
-	while (item != NULL)
-	{
-		delete item->data;
-		item = item->next;
-	}
-
-	bodies.clear();
-	// Delete the whole physics world!
-	delete world;
-
-	return true;
 }
 
 void PhysBody::GetPosition(int& x, int &y) const
@@ -582,32 +566,6 @@ bool PhysBody::Contains(int x, int y) const
 	return false;
 }
 
-int PhysBody::RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const
-{
-	int ret = -1;
-
-	b2Fixture *fixt = body->GetFixtureList();
-	b2RayCastInput input;
-	input.p1.Set(PIXEL_TO_METERS(x1), PIXEL_TO_METERS(y1));
-	input.p2.Set(PIXEL_TO_METERS(x2), PIXEL_TO_METERS(y2));
-	input.maxFraction = 1.0f;
-
-	b2RayCastOutput output;
-
-	for (fixt; fixt != NULL; fixt = fixt->GetNext())
-	{
-		if (fixt->GetShape()->RayCast(&output, input, body->GetTransform(), 0))
-		{
-			normal_x = output.normal.x;
-			normal_y = output.normal.y;
-			b2Vec2 hit_point = input.p1 + output.fraction * (input.p2 - input.p1);
-			ret = METERS_TO_PIXELS(b2Distance(input.p1, hit_point));
-		}
-	}
-
-	return ret;
-}
-
 void ModulePhysics::BeginContact(b2Contact* contact)
 {
 	PhysBody* physA = (PhysBody*)contact->GetFixtureA()->GetBody()->GetUserData();
@@ -628,14 +586,32 @@ void PhysBody::Turn(int degrees)
 
 void PhysBody::Push(float x, float y)
 {
-	//body->ApplyLinearImpulse(b2Vec2(x, y), body->GetLocalCenter(), true);
 	body->ApplyForceToCenter(b2Vec2(x, y), true);
-
 }
 
 double PhysBody::GetAngle()const
 {
 	return RADTODEG * body->GetAngle();
+}
+
+// Called before quitting
+bool ModulePhysics::CleanUp()
+{
+	LOG("Destroying physics world");
+
+	p2List_item<PhysBody*>* item = bodies.getFirst();
+
+	while (item != NULL)
+	{
+		delete item->data;
+		item = item->next;
+	}
+
+	bodies.clear();
+	// Delete the whole physics world!
+	delete world;
+
+	return true;
 }
 
 

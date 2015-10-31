@@ -19,12 +19,12 @@ public:
 	{};
 
 	PhysBody(b2Body* body, const SDL_Rect& rect);
+
 	~PhysBody();
 
 	void GetPosition(int& x, int &y) const;
 	float GetRotation() const;
 	bool Contains(int x, int y) const;
-	int RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const;
 	void Turn(int degrees);
 	void Push(float x, float y);
 	double GetAngle() const;
@@ -82,12 +82,9 @@ private:
 	b2Body* click_body;
 	p2List<PhysBody*> bodies;
 
+public:
 	float32 time_step;
 	int32 velocity_iter;
 	int32 position_iter;
-
-public:
-
-	
 	
 };

@@ -4,7 +4,7 @@
 #include "p2Point.h"
 #include "Globals.h"
 
-class PhysBody;
+
 
 class ModuleSceneIntro : public Module
 {
@@ -52,6 +52,5 @@ public:
 	uint flipper_fx;
 	uint spring_down_fx;
 	uint spring_up_fx;
-	p2Point<int> ray;
-	bool ray_on;
+	
 };
