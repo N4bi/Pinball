@@ -18,7 +18,7 @@ public:
 	PhysBody() : listener(NULL), body(NULL)
 	{};
 
-	PhysBody(b2Body* body, const SDL_Rect& rect);
+	PhysBody(b2Body* body);
 
 	~PhysBody();
 
@@ -31,14 +31,12 @@ public:
 
 
 public:
+
 	int width, height;
 	b2Body* body;
 	Module* listener;
 	SDL_Texture* texture;
 	
-
-private:
-	SDL_Rect rect;
 };
 
 // Module --------------------------------------
@@ -55,23 +53,21 @@ public:
 
 	PhysBody* CreateCircle(int x, int y, int radius);
 	PhysBody* CreateRectangle(int x, int y, int width, int height);
-	PhysBody* CreateRectangle(const SDL_Rect& rect);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height);
 	PhysBody* CreateChain(int x, int y, int* points, int size);
-	PhysBody* CreateCircleStatic(int x, int y, int radius);
-	PhysBody* CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_x, int pivot_y, int* points, uint size, int anchorA_x, int anchorA_y, int AnchorB_x, int AnchorB_y, float lower_angle, float upper_angle, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
-
+	PhysBody* CreateChainStatic(int x, int y, int* points, int size, float density = 1.0f, float restitution = 0.0f, bool isSensor = false);
+	PhysBody* CreateCircleStatic(int x, int y, int radius, float density = 1.0f, float restitution = 0.0f, bool ccd = false, bool isSensor = false);
 	PhysBody* AddWall(int x, int y, int* points, int size, float restitution = 0.0f);
 	PhysBody* AddSpring(int x_box, int y_box, SDL_Texture* texture, float restitution = 0.0f);
+	PhysBody* CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_x, int pivot_y, int* points, uint size, int anchorA_x, int anchorA_y, int AnchorB_x, int AnchorB_y, float lower_angle, float upper_angle, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
+
+
 
 	
 	// b2ContactListener ---
 
 	void BeginContact(b2Contact* contact);
 	void DestroyBody(PhysBody* body);
-
-	
-
 
 private:
 
@@ -83,6 +79,7 @@ private:
 	p2List<PhysBody*> bodies;
 
 public:
+
 	float32 time_step;
 	int32 velocity_iter;
 	int32 position_iter;

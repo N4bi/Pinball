@@ -6,6 +6,9 @@
 #include "ModuleTextures.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
+#include "ModuleWindow.h"
+
+#define BOUNCE_TIME 100
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -19,28 +22,54 @@ ModuleSceneIntro::~ModuleSceneIntro()
 // Load assets
 bool ModuleSceneIntro::Start()
 {
+	counter_box = 0;
 	LOG("Loading Intro assets");
 	bool ret = true;
-
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 	
-	//Graphics
+	//Graphics 
+
+			//Table
 	ball = App->textures->Load("Game/pinball/ball.png");
 	table = App->textures->Load("Game/pinball/ground3.png");
+	grey_bouncer_texture = App->textures->Load("Game/pinball/grey_bouncer.png");
+	green_bouncer_texture = App->textures->Load("Game/pinball/green_bouncer.png");
+	points_texture = App->textures->Load("Game/pinball/+100.png");
+
+			//Sensor Lights
+	green_cube_texture = App->textures->Load("Game/pinball/green.png");
+	blue_cube_texture = App->textures->Load("Game/pinball/blue.png");
+	red_cube_texture = App->textures->Load("Game/pinball/red.png");
+	pink_cube_texture = App->textures->Load("Game/pinball/pink.png");
+	orange_cube_texture = App->textures->Load("Game/pinball/orange.png");
+	yellow_cube_texture = App->textures->Load("Game/pinball/yellow.png");
+	yellow_light_texture = App->textures->Load("Game/pinball/yellow_light.png");
+	girl_texture = App->textures->Load("Game/pinball/girl.png");
+	boy_texture = App->textures->Load("Game/pinball/boy.png");
+	green_rectangle_texture = App->textures->Load("Game/pinball/green_rectangle_light.png");
+
 
 	//Audio
 
 			//Music
 	App->audio->PlayMusic("Game/pinball/sounds/music_pinball.ogg");
+			
+			//SFX 
+				
+				//Table
+	grey_green_bouncer_fx = App->audio->LoadFx("Game/pinball/sounds/green_grey_bouncer_hit.wav");
+	wall_fx = App->audio->LoadFx("Game/pinball/sounds/wall_hit.wav");
+
+				//Sensor fx
+	color_box_fx = App->audio->LoadFx("Game/pinball/sounds/color_box.wav");
+	char_touch_fx = App->audio->LoadFx("Game/pinball/sounds/char_touch.wav");
+	side_bouncer_fx = App->audio->LoadFx("Game/pinball/sounds/bell.wav");
+	yellow_light_fx = App->audio->LoadFx("Game/pinball/sounds/dog_barking.wav");
 
 
 
 	//Creation of the initial ball
 	ball_start = App->physics->CreateCircle(516, 823, 12);
-
-
-	
-	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 	
 /////////////////////////////////////////////////////////////////
 
@@ -388,15 +417,78 @@ bool ModuleSceneIntro::Start()
 	walls.add(App->physics->AddWall(0, 0, tunnel_wall_right, 66, 0.4f));
 	walls.add(App->physics->AddWall(0, 0, tunnel_wall_left, 76, 0.4f));
 	walls.add(App->physics->AddWall(0, 0, multi_ball_stuff, 46, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, bouncer_left, 12, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, bouncer_right, 12, 0.4f));
+
 
 
 	// Other stuff
 
+		//Side bouncers
+	bouncer_left_body.body = App->physics->CreateChainStatic(0, 0, bouncer_left, 12, 1.0f, 0.7f, false);
+	bouncer_left_body.body->listener = this;
 
+	bouncer_right_body.body = App->physics->CreateChainStatic(0, 0, bouncer_right, 12, 1.0f, 0.7f, false);
+	bouncer_right_body.body->listener = this;
+
+		//Green bouncers on the middle of the table
+	green_bouncer1.body = App->physics->CreateCircleStatic(464, 375, 32, 1.0f, 1.0f);
+	green_bouncer1.body->listener = this;
+
+	green_bouncer2.body = App->physics->CreateCircleStatic(322, 499, 32, 1.0f, 1.0f);
+	green_bouncer2.body->listener = this;
+
+		// Grey bouncers
+	grey_bouncer1.body = App->physics->CreateCircleStatic(471, 756, 11, 1.0f, 0.6f);
+	grey_bouncer1.body->listener = this;
+
+	grey_bouncer2.body = App->physics->CreateCircleStatic(130, 298, 11, 1.0f, 0.6f);
+	grey_bouncer2.body->listener = this;
+
+	grey_bouncer3.body = App->physics->CreateCircleStatic(510, 248, 11, 1.0f, 0.6f);
+	grey_bouncer3.body->listener = this;
+
+	grey_bouncer4.body = App->physics->CreateCircleStatic(264, 148, 11, 1.0f, 0.6f);
+	grey_bouncer4.body->listener = this;
+
+	grey_bouncer5.body = App->physics->CreateCircleStatic(344, 144, 11, 1.0f, 0.6f);
+	grey_bouncer5.body->listener = this;
+
+	grey_bouncer6.body = App->physics->CreateCircleStatic(477, 144, 11, 1.0f, 0.6f);
+	grey_bouncer6.body->listener = this;
+
+	grey_bouncer7.body = App->physics->CreateCircleStatic(420, 79, 11, 1.0f, 0.6f);
+	grey_bouncer7.body->listener = this;
+	
 
 ///////////////////////////////////////////////////////////////
+
+	//Sensors (all lights)
+		
+	lights.PushBack(Light(this, 366, 606, lightTypes::red_box));
+	lights.PushBack(Light(this, 241, 577, lightTypes::pink_box));
+	lights.PushBack(Light(this, 121, 601, lightTypes::yellow_box));
+	lights.PushBack(Light(this, 172, 762, lightTypes::blue_box));
+	lights.PushBack(Light(this, 286, 762, lightTypes::green_box));
+	lights.PushBack(Light(this, 228, 869, lightTypes::orange_box));
+
+	lights.PushBack(Light(this, 415, 764, lightTypes::girl_light));
+	lights.PushBack(Light(this, 42, 767, lightTypes::boy_light));
+
+	lights.PushBack(Light(this, 111, 545, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 97, 362, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 97, 314, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 112, 222, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 457, 468, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 457, 266, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 338, 60, lightTypes::yellow_light));
+	lights.PushBack(Light(this, 441, 60, lightTypes::yellow_light));
+
+	lights.PushBack(Light(this, 263, 296, lightTypes::green_rectangle));
+	lights.PushBack(Light(this, 388, 117, lightTypes::green_rectangle));
+
+	//Sensor for player losing
+	
+	player_lose = App->physics->CreateRectangleSensor(261, 1025, 234, 19);
+
 	
 	return ret;
 }
@@ -407,6 +499,9 @@ bool ModuleSceneIntro::CleanUp()
 	LOG("Unloading Intro scene");
 	App->textures->Unload(ball);
 	App->textures->Unload(table);
+	App->textures->Unload(green_bouncer_texture);
+	App->textures->Unload(grey_bouncer_texture);
+	App->textures->Unload(points_texture);
 
 
 	return true;
@@ -415,6 +510,7 @@ bool ModuleSceneIntro::CleanUp()
 // Update: draw background
 update_status ModuleSceneIntro::Update()
 { 
+
 	//Draw stuff
 	
 	App->renderer->Blit(table, 0, 0);
@@ -423,6 +519,158 @@ update_status ModuleSceneIntro::Update()
 
 	ball_start->GetPosition(x, y);
 	App->renderer->Blit(ball, x, y, NULL, 1.0f,ball_start->GetRotation());
+
+	//Bouncer reactions stuff
+
+		// Green Bouncers
+	if (green_bouncer1.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), green_bouncer1.hit_timer) == false)
+		{
+			App->renderer->Blit(green_bouncer_texture, 464 - 50, 375 - 50);
+		}
+		else
+		{
+			green_bouncer1.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (green_bouncer2.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), green_bouncer2.hit_timer) == false)
+		{
+			App->renderer->Blit(green_bouncer_texture, 322 - 50, 499 - 50);
+		}
+		else
+		{
+			green_bouncer2.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+		// Grey bouncers
+
+	if (grey_bouncer1.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer1.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 471-11, 756-11);
+			App->renderer->Blit(points_texture, 471-15, 756-15);
+		}
+		else
+		{
+			grey_bouncer1.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (grey_bouncer2.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer2.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 130-11, 298-11);
+			App->renderer->Blit(points_texture, 130 - 15, 298 - 15);
+		}
+		else
+		{
+			grey_bouncer2.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (grey_bouncer3.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer3.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 510-11, 248-11);
+			App->renderer->Blit(points_texture, 510 - 15, 248 - 15);
+		}
+		else
+		{
+			grey_bouncer3.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (grey_bouncer4.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer4.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 264-11, 148-11);
+			App->renderer->Blit(points_texture, 264 - 15, 148 - 15);
+		}
+		else
+		{
+			grey_bouncer4.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (grey_bouncer5.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer5.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 344-11, 144-11);
+			App->renderer->Blit(points_texture, 344 - 15, 144 - 15);
+		}
+		else
+		{
+			grey_bouncer5.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (grey_bouncer6.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer6.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 477-11, 144-11);
+			App->renderer->Blit(points_texture, 477 - 15, 144 - 15);
+		}
+		else
+		{
+			grey_bouncer6.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (grey_bouncer7.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), grey_bouncer7.hit_timer) == false)
+		{
+			App->renderer->Blit(grey_bouncer_texture, 420-11, 79-11);
+			App->renderer->Blit(points_texture, 420 - 15, 79 - 15);
+		}
+		else
+		{
+			grey_bouncer7.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	for (uint i = 0; i < lights.Count(); ++i)
+	{
+		if (lights[i].on == true)
+		{
+			App->renderer->Blit(lights[i].texture, lights[i].x, lights[i].y);
+			
+		}
+	}
+
+	if (counter_box > 5)
+	{
+		for (uint i = 0; i < lights.Count(); ++i)
+		{
+			if (lights[i].on == true)
+			{
+				lights[i].on = false;
+				counter_box = 0;
+				App->audio->PlayFx(char_touch_fx);
+				//TODO: Suma +500 de score
+			}
+		}
+	}
+
 
 /////////////////////////////////////////////////////////////////
 
@@ -450,15 +698,211 @@ update_status ModuleSceneIntro::Update()
 		App->renderer->Blit(ball, x, y, NULL, 1.0f, c->data->GetRotation());
 		c = c->next;
 	}
+	char title[100];
+	sprintf_s(title, "Balls: %d Score: %06d Last Score: %06d Counter Box: %d" , lives, score, last_score,counter_box);
+	App->window->SetTitle(title);
 
 	return UPDATE_CONTINUE;
 }
 
 void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
-	int x, y;
+	//Green bouncer collision
+	if (green_bouncer1.body == bodyA)
+	{
+		green_bouncer1.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
 
-	//App->audio->PlayFx(bonus_fx);
+	if (green_bouncer2.body == bodyA)
+	{
+		green_bouncer2.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
 
+	//Grey bouncer collision
+
+	if (grey_bouncer1.body == bodyA)
+	{
+		grey_bouncer1.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+	if (grey_bouncer2.body == bodyA)
+	{
+		grey_bouncer2.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+	if (grey_bouncer3.body == bodyA)
+	{
+		grey_bouncer3.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+	if (grey_bouncer4.body == bodyA)
+	{
+		grey_bouncer4.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+
+	if (grey_bouncer5.body == bodyA)
+	{
+		grey_bouncer5.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+
+	if (grey_bouncer6.body == bodyA)
+	{
+		grey_bouncer6.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+
+	if (grey_bouncer7.body == bodyA)
+	{
+		grey_bouncer7.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(grey_green_bouncer_fx);
+		return;
+	}
+
+
+	for (uint i = 0; i < lights.Count(); ++i)
+	{
+		if (bodyA == lights[i].body)
+		{
+			if (lights[i].on == false)
+			{
+				lights[i].on = true;
+				App->audio->PlayFx(lights[i].fx);
+				switch (lights[i].type)
+				{ // TODO: añadir el resto de casos para hacer mas combis.
+				case green_box:
+					counter_box += 1;
+					//Score box here TODO
+					break;
+				case red_box :
+					counter_box += 1;
+					//Score box here TODO
+					break;
+				case pink_box:
+					counter_box += 1;
+					//Score box here TODO
+					break;
+				case yellow_box:
+					counter_box += 1;
+					//Score box here TODO
+					break;
+				case blue_box:
+					counter_box += 1;
+					//Score box here TODO
+					break;
+				case orange_box:
+					counter_box += 1;
+					//Score box here TODO
+					break;
+				}
+
+
+			}
+			return;
+		}
+	}
+}
+
+Light::Light(ModuleSceneIntro* scene, int x, int y, lightTypes type)
+{
+	this->type = type;
+	this->x = x;
+	this->y = y;
 	
+	int radius;
+	int width = 68;
+	int height = 59;
+
+	switch (type)
+	{
+		case green_box:
+			texture = scene->green_cube_texture;
+			fx = scene->color_box_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case red_box:
+			texture = scene->red_cube_texture;
+			fx = scene->color_box_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case pink_box:
+			texture = scene->pink_cube_texture;
+			fx = scene->color_box_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case yellow_box:
+			texture = scene->yellow_cube_texture;
+			fx = scene->color_box_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case blue_box:
+			texture = scene->blue_cube_texture;
+			fx = scene->color_box_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case orange_box:
+			texture = scene->orange_cube_texture;
+			fx = scene->color_box_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case girl_light:
+			texture = scene->girl_texture;
+			fx = scene->char_touch_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case boy_light:
+			texture = scene->boy_texture;
+			fx = scene->char_touch_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+		case yellow_light:
+			radius = 20;
+			texture = scene->yellow_light_texture;
+			fx = scene->yellow_light_fx;
+			body = scene->App->physics->CreateCircleStatic(x+30, y+30, radius, 1.0f, 0.0f, false, true);
+			body->listener = scene;
+			break;
+
+		case green_rectangle:
+			texture = scene->green_rectangle_texture;
+			fx = scene->yellow_light_fx;
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body->listener = scene;
+			break;
+
+	}
+	on = false;
 }

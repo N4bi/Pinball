@@ -16,13 +16,13 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 {
 	world = NULL;
 	mouse_joint = NULL;
-	debug = true;
+	debug = false;
 	time_step = 0.0f;
 	velocity_iter = 0;
 	position_iter = 0.0f;
 }
 
-PhysBody::PhysBody(b2Body* body, const SDL_Rect& rect) : body(body), rect(rect), listener(NULL)
+PhysBody::PhysBody(b2Body* body) : body(body), listener(NULL)
 {
 }
 
@@ -105,11 +105,12 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateCircleStatic(int x, int y, int radius)
+PhysBody* ModulePhysics::CreateCircleStatic(int x, int y, int radius, float density, float restitution, bool ccd, bool isSensor)
 {
 	b2BodyDef body;
 	body.type = b2_staticBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.bullet = ccd;
 
 	b2Body* b = world->CreateBody(&body);
 
@@ -117,7 +118,9 @@ PhysBody* ModulePhysics::CreateCircleStatic(int x, int y, int radius)
 	shape.m_radius = PIXEL_TO_METERS(radius);
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
-	fixture.density = 1.0f;
+	fixture.density = density;
+	fixture.restitution = restitution;
+	fixture.isSensor = isSensor;
 
 	b->CreateFixture(&fixture);
 
@@ -151,35 +154,6 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 	b->SetUserData(pbody);
 	pbody->width = width * 0.5f;
 	pbody->height = height * 0.5f;
-	bodies.add(pbody);
-
-	return pbody;
-}
-
-//Create a rectangle with SDL_Rect
-PhysBody* ModulePhysics::CreateRectangle(const SDL_Rect& rect)
-{
-	b2BodyDef body;
-	body.type = b2_dynamicBody;
-	body.position.Set(PIXEL_TO_METERS(rect.x), PIXEL_TO_METERS(rect.y));
-
-	b2Body* b = world->CreateBody(&body);
-
-	b2PolygonShape box;
-
-	box.SetAsBox(PIXEL_TO_METERS(rect.w/2), PIXEL_TO_METERS(rect.h/2));
-
-	b2FixtureDef fixture;
-	fixture.shape = &box;
-	fixture.density = 1.0f;
-
-	b->CreateFixture(&fixture);
-
-	PhysBody* pbody = new PhysBody();
-	pbody->body = b;
-	b->SetUserData(pbody);
-	pbody->width = rect.w/2;
-	pbody->height = rect.h/2;
 	bodies.add(pbody);
 
 	return pbody;
@@ -234,6 +208,44 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, int* points, int size)
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
+
+	b->CreateFixture(&fixture);
+
+	delete[] p;
+
+	PhysBody* pbody = new PhysBody();
+	pbody->body = b;
+	b->SetUserData(pbody);
+	pbody->width = pbody->height = 0;
+	bodies.add(pbody);
+
+	return pbody;
+}
+
+PhysBody* ModulePhysics::CreateChainStatic(int x, int y, int* points, int size, float density, float restitution, bool isSensor)
+{
+	b2BodyDef body;
+	body.type = b2_staticBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2ChainShape shape;
+	b2Vec2* p = new b2Vec2[size / 2];
+
+	for (uint i = 0; i < size / 2; ++i)
+	{
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
+		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
+	}
+
+	shape.CreateLoop(p, size / 2);
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+	fixture.density = density;
+	fixture.restitution = restitution;
+	fixture.isSensor = isSensor;
 
 	b->CreateFixture(&fixture);
 
@@ -538,6 +550,21 @@ update_status ModulePhysics::PostUpdate()
 	return UPDATE_CONTINUE;
 }
 
+
+void ModulePhysics::BeginContact(b2Contact* contact)
+{
+	PhysBody* physA = (PhysBody*)contact->GetFixtureA()->GetBody()->GetUserData();
+	PhysBody* physB = (PhysBody*)contact->GetFixtureB()->GetBody()->GetUserData();
+
+	if(physA && physA->listener != NULL)
+		physA->listener->OnCollision(physA, physB);
+
+	if(physB && physB->listener != NULL)
+		physB->listener->OnCollision(physB, physA);
+}
+
+//PhysBody Utilities
+
 void PhysBody::GetPosition(int& x, int &y) const
 {
 	b2Vec2 pos = body->GetPosition();
@@ -556,28 +583,15 @@ bool PhysBody::Contains(int x, int y) const
 
 	const b2Fixture* fixture = body->GetFixtureList();
 
-	while(fixture != NULL)
+	while (fixture != NULL)
 	{
-		if(fixture->GetShape()->TestPoint(body->GetTransform(), p) == true)
+		if (fixture->GetShape()->TestPoint(body->GetTransform(), p) == true)
 			return true;
 		fixture = fixture->GetNext();
 	}
 
 	return false;
 }
-
-void ModulePhysics::BeginContact(b2Contact* contact)
-{
-	PhysBody* physA = (PhysBody*)contact->GetFixtureA()->GetBody()->GetUserData();
-	PhysBody* physB = (PhysBody*)contact->GetFixtureB()->GetBody()->GetUserData();
-
-	if(physA && physA->listener != NULL)
-		physA->listener->OnCollision(physA, physB);
-
-	if(physB && physB->listener != NULL)
-		physB->listener->OnCollision(physB, physA);
-}
-
 
 void PhysBody::Turn(int degrees)
 {
