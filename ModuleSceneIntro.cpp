@@ -7,13 +7,13 @@
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
 #include "ModuleWindow.h"
+#include "ModulePlayer.h"
 
-#define BOUNCE_TIME 100
+#define BOUNCE_TIME 300
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	ball = table = NULL;
-	sensed = false;
+	table = NULL;
 }
 
 ModuleSceneIntro::~ModuleSceneIntro()
@@ -22,18 +22,21 @@ ModuleSceneIntro::~ModuleSceneIntro()
 // Load assets
 bool ModuleSceneIntro::Start()
 {
-	counter_box = 0;
+	
 	LOG("Loading Intro assets");
 	bool ret = true;
 	App->renderer->camera.x = App->renderer->camera.y = 0;
+
 	
 	//Graphics 
 
 			//Table
-	ball = App->textures->Load("Game/pinball/ball.png");
+
 	table = App->textures->Load("Game/pinball/ground3.png");
 	grey_bouncer_texture = App->textures->Load("Game/pinball/grey_bouncer.png");
 	green_bouncer_texture = App->textures->Load("Game/pinball/green_bouncer.png");
+	bouncer_left_texture = App->textures->Load("Game/pinball/side_bouncer_left.png");
+	bouncer_right_texture = App->textures->Load("Game/pinball/side_bouncer_right.png");
 	points_texture = App->textures->Load("Game/pinball/+100.png");
 
 			//Sensor Lights
@@ -65,12 +68,10 @@ bool ModuleSceneIntro::Start()
 	char_touch_fx = App->audio->LoadFx("Game/pinball/sounds/char_touch.wav");
 	side_bouncer_fx = App->audio->LoadFx("Game/pinball/sounds/bell.wav");
 	yellow_light_fx = App->audio->LoadFx("Game/pinball/sounds/dog_barking.wav");
+	green_rectangle_fx = App->audio->LoadFx("Game/pinball/sounds/green_rectangle.wav");
+	player_lose_fx = App->audio->LoadFx("Game/pinball/sounds/player_lose.wav");
 
 
-
-	//Creation of the initial ball
-	ball_start = App->physics->CreateCircle(516, 823, 12);
-	
 /////////////////////////////////////////////////////////////////
 
 	// Table vertex
@@ -487,7 +488,10 @@ bool ModuleSceneIntro::Start()
 
 	//Sensor for player losing
 	
-	player_lose = App->physics->CreateRectangleSensor(261, 1025, 234, 19);
+	player_lose = App->physics->CreateRectangleSensor(261, 1060, 200, 50);
+	player_lose->listener = this;
+
+	
 
 	
 	return ret;
@@ -497,11 +501,25 @@ bool ModuleSceneIntro::Start()
 bool ModuleSceneIntro::CleanUp()
 {
 	LOG("Unloading Intro scene");
-	App->textures->Unload(ball);
+
 	App->textures->Unload(table);
 	App->textures->Unload(green_bouncer_texture);
 	App->textures->Unload(grey_bouncer_texture);
 	App->textures->Unload(points_texture);
+	App->textures->Unload(green_cube_texture);
+	App->textures->Unload(blue_cube_texture);
+	App->textures->Unload(red_cube_texture);
+	App->textures->Unload(pink_cube_texture);
+	App->textures->Unload(orange_cube_texture);
+	App->textures->Unload(yellow_cube_texture);
+	App->textures->Unload(yellow_light_texture);
+	App->textures->Unload(girl_texture);
+	App->textures->Unload(boy_texture);
+	App->textures->Unload(green_rectangle_texture);
+	App->textures->Unload(bouncer_left_texture);
+	App->textures->Unload(bouncer_right_texture);
+
+
 
 
 	return true;
@@ -515,12 +533,34 @@ update_status ModuleSceneIntro::Update()
 	
 	App->renderer->Blit(table, 0, 0);
 
-	int x, y;
-
-	ball_start->GetPosition(x, y);
-	App->renderer->Blit(ball, x, y, NULL, 1.0f,ball_start->GetRotation());
-
 	//Bouncer reactions stuff
+
+			//Side Bouncers
+	if(bouncer_right_body.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), bouncer_right_body.hit_timer) == false)
+		{
+			App->renderer->Blit(bouncer_right_texture, 401-55, 766);
+		}
+		else
+		{
+			bouncer_right_body.hit_timer = 0;
+			//Score here += x;
+		}
+	}
+
+	if (bouncer_left_body.hit_timer > 0)
+	{
+		if (SDL_TICKS_PASSED(SDL_GetTicks(), bouncer_left_body.hit_timer) == false)
+		{
+			App->renderer->Blit(bouncer_left_texture, 111-5, 766);
+		}
+		else
+		{
+			bouncer_left_body.hit_timer = 0;
+			//Score here += x;
+		}
+	}
 
 		// Green Bouncers
 	if (green_bouncer1.hit_timer > 0)
@@ -659,14 +699,66 @@ update_status ModuleSceneIntro::Update()
 
 	if (counter_box > 5)
 	{
+		score += 1000;
+
 		for (uint i = 0; i < lights.Count(); ++i)
 		{
-			if (lights[i].on == true)
+			if (lights[i].on == true && lights[i].type == orange_box || lights[i].type == blue_box || lights[i].type == green_box || lights[i].type == red_box || lights[i].type == pink_box || lights[i].type == yellow_box)
 			{
 				lights[i].on = false;
 				counter_box = 0;
 				App->audio->PlayFx(char_touch_fx);
-				//TODO: Suma +500 de score
+				
+			}
+		}
+	}
+
+	if (counter_char_box > 1)
+	{
+		score += 1000;
+
+		for (uint i = 0; i < lights.Count(); ++i)
+		{
+			if (lights[i].on == true && lights[i].type == boy_light || lights[i].type == girl_light)
+			{
+				lights[i].on = false;
+				counter_char_box = 0;
+				App->audio->PlayFx(char_touch_fx);
+				
+
+			}
+		}
+	}
+
+	if (counter_yellow_lights > 7)
+	{
+		score += 1000;
+
+		for (uint i = 0; i < lights.Count(); ++i)
+		{
+			if (lights[i].on == true && lights[i].type == yellow_light)
+			{
+				lights[i].on = false;
+				counter_yellow_lights = 0;
+				App->audio->PlayFx(char_touch_fx);
+
+			}
+		}
+	}
+
+	if (counter_green_rectangles > 1)
+	{
+		score += 1000;
+		lives += 1;
+
+		for (uint i = 0; i < lights.Count(); ++i)
+		{
+			if (lights[i].on == true && lights[i].type == green_rectangle)
+			{
+				lights[i].on = false;
+				counter_green_rectangles = 0;
+				App->audio->PlayFx(green_rectangle_fx);
+
 			}
 		}
 	}
@@ -674,32 +766,8 @@ update_status ModuleSceneIntro::Update()
 
 /////////////////////////////////////////////////////////////////
 
-	//Key stuff
-
-	if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
-	{
-		balls.add(App->physics->CreateCircle(516, 823, 12));
-		balls.getLast()->data->listener = this;
-	}
-
-	if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
-	{
-		balls.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 12));
-		balls.getLast()->data->listener = this;
-	}
-
-	// All draw functions ------------------------------------------------------
-	p2List_item<PhysBody*>* c = balls.getFirst();
-
-	while (c != NULL)
-	{
-		int x, y;
-		c->data->GetPosition(x, y);
-		App->renderer->Blit(ball, x, y, NULL, 1.0f, c->data->GetRotation());
-		c = c->next;
-	}
 	char title[100];
-	sprintf_s(title, "Balls: %d Score: %06d Last Score: %06d Counter Box: %d" , lives, score, last_score,counter_box);
+	sprintf_s(title, "Balls: %d Score: %06d Last Score: %06d" , lives, score, last_score);
 	App->window->SetTitle(title);
 
 	return UPDATE_CONTINUE;
@@ -707,6 +775,22 @@ update_status ModuleSceneIntro::Update()
 
 void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
+	//Side Bouncers Collision
+	if (bouncer_left_body.body == bodyA)
+	{
+		bouncer_left_body.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(side_bouncer_fx);
+		return;
+	}
+
+	if (bouncer_right_body.body == bodyA)
+	{
+		bouncer_right_body.hit_timer = SDL_GetTicks() + BOUNCE_TIME;
+		App->audio->PlayFx(side_bouncer_fx);
+		return;
+	}
+
+
 	//Green bouncer collision
 	if (green_bouncer1.body == bodyA)
 	{
@@ -789,27 +873,62 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 				{ // TODO: añadir el resto de casos para hacer mas combis.
 				case green_box:
 					counter_box += 1;
-					//Score box here TODO
+					total_counter += 1;
+					score += 100;
 					break;
+
 				case red_box :
 					counter_box += 1;
-					//Score box here TODO
+					total_counter += 1;
+					score += 100;
 					break;
+
 				case pink_box:
 					counter_box += 1;
-					//Score box here TODO
+					total_counter += 1;
+					score += 100;
 					break;
+
 				case yellow_box:
 					counter_box += 1;
-					//Score box here TODO
+					total_counter += 1;
+					score += 100;
 					break;
+
 				case blue_box:
 					counter_box += 1;
-					//Score box here TODO
+					total_counter += 1;
+					score += 100;
 					break;
+
 				case orange_box:
 					counter_box += 1;
-					//Score box here TODO
+					total_counter += 1;
+					score += 100;
+					break;
+
+				case boy_light:
+					counter_char_box += 1;
+					total_counter += 1;
+					score += 100;
+					break;
+
+				case girl_light:
+					counter_char_box += 1;
+					total_counter += 1;
+					score += 100;
+					break;
+
+				case yellow_light:
+					counter_yellow_lights += 1;
+					total_counter += 1;
+					score += 100;
+					break;
+
+				case green_rectangle:
+					counter_green_rectangles += 1;
+					total_counter += 1;
+					score += 100;
 					break;
 				}
 
@@ -818,6 +937,42 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			return;
 		}
 	}
+
+	if (player_lose == bodyA)
+	{
+		App->player->ball_start->SetLinearVelocity(0, 0);
+		App->player->ball_start->SetAngularVelocity(0);
+		App->player->ball_start->SetPosition(516, 823);
+		lives--;
+
+		App->audio->PlayFx(player_lose_fx);
+		
+		if (lives <= 0)
+		{
+			last_score = score;
+			score = 0;
+			lives = 3;
+
+			for (uint i = 0; i < lights.Count(); ++i)
+			{
+				if (lights[i].on == true)
+				{
+					lights[i].on = false;
+					counter_box = 0;
+					counter_char_box = 0;
+					counter_yellow_lights = 0;
+					counter_green_rectangles = 0;
+
+
+				}
+			}
+			
+		}
+		return;
+	}
+
+
+
 }
 
 Light::Light(ModuleSceneIntro* scene, int x, int y, lightTypes type)
@@ -870,7 +1025,7 @@ Light::Light(ModuleSceneIntro* scene, int x, int y, lightTypes type)
 		case orange_box:
 			texture = scene->orange_cube_texture;
 			fx = scene->color_box_fx;
-			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
+			body = scene->App->physics->CreateRectangleSensor(x+33, y+25, width, height);
 			body->listener = scene;
 			break;
 
@@ -898,7 +1053,7 @@ Light::Light(ModuleSceneIntro* scene, int x, int y, lightTypes type)
 
 		case green_rectangle:
 			texture = scene->green_rectangle_texture;
-			fx = scene->yellow_light_fx;
+			fx = scene->green_rectangle_fx;
 			body = scene->App->physics->CreateRectangleSensor(x+33, y+33, width, height);
 			body->listener = scene;
 			break;

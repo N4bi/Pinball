@@ -74,17 +74,19 @@ update_status ModulePhysics::PreUpdate()
 
 	return UPDATE_CONTINUE;
 }
+
 void ModulePhysics::DestroyBody(PhysBody* body)
 {
 	bodies.del(bodies.findNode(body));
 	delete body;
 }
 
-PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
+PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, bool isSensor,bool ccd)
 {
 	b2BodyDef body;
 	body.type = b2_dynamicBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.bullet = ccd;
 
 	b2Body* b = world->CreateBody(&body);
 
@@ -93,6 +95,7 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
+	fixture.isSensor = isSensor;
 
 	b->CreateFixture(&fixture);
 
@@ -551,7 +554,7 @@ update_status ModulePhysics::PostUpdate()
 }
 
 
-void ModulePhysics::BeginContact(b2Contact* contact)
+void ModulePhysics::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
 	PhysBody* physA = (PhysBody*)contact->GetFixtureA()->GetBody()->GetUserData();
 	PhysBody* physB = (PhysBody*)contact->GetFixtureB()->GetBody()->GetUserData();
@@ -606,6 +609,21 @@ void PhysBody::Push(float x, float y)
 double PhysBody::GetAngle()const
 {
 	return RADTODEG * body->GetAngle();
+}
+
+void PhysBody::SetPosition(int x, int y)
+{
+	body->SetTransform(b2Vec2(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y)), 0.0f);
+}
+
+void PhysBody::SetAngularVelocity(float velocity)
+{
+	body->SetAngularVelocity(velocity * DEGTORAD);
+}
+
+void PhysBody::SetLinearVelocity(int x, int y)
+{
+	body->SetLinearVelocity(b2Vec2(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y)));
 }
 
 // Called before quitting

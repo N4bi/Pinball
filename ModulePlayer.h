@@ -20,9 +20,8 @@ public:
 	bool CleanUp();
 
 public:
-
+	
 	p2List<PhysBody*> balls;
-	p2List<PhysBody*> walls;
 	PhysBody* flipperDL; // down left
 	PhysBody* flipperDR; // down right
 	PhysBody* flipperUL; // up left
@@ -33,15 +32,15 @@ public:
 	PhysBody* spring_wheel;
 	PhysBody* ball_start;
 
-	PhysBody* sensor;
-	bool sensed;
-
+	//Textures
 	SDL_Texture* flipperDL_texture;
 	SDL_Texture* flipperDR_texture;
 	SDL_Texture* flipperUL_texture;
 	SDL_Texture* flipperUR_texture;
 	SDL_Texture* spring_texture;
+	SDL_Texture* ball;
 
+	//SFX
 	uint bonus_fx;
 	uint flipper_fx;
 	uint spring_down_fx;

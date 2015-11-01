@@ -21,6 +21,7 @@ bool ModulePlayer::Start()
 	LOG("Loading player");
 
 	//Graphics
+	ball = App->textures->Load("Game/pinball/ball.png");
 	flipperDL_texture = App->textures->Load("Game/pinball/flipper.png");
 	flipperDR_texture = App->textures->Load("Game/pinball/flipper_right.png");
 	flipperUL_texture = App->textures->Load("Game/pinball/flipperUp_left.png");
@@ -81,7 +82,7 @@ bool ModulePlayer::Start()
 		40, 3
 	};
 
-	//Flippers & Spring
+	//Flippers & Spring & Ball
 	flipperDL = App->physics->CreateFlipper(177, 953, 177 + 16, 953 + 16, flipper_down_left, 16, 16, 16, 0, 0, 0.0f, 80.0f, 1.0f, 0.0f, false, false, flipperDL_texture);
 	flipperDR = App->physics->CreateFlipper(280, 953, 350 - 16, 953 + 16, flipper_down_right, 16, 46, 16, 0, 0, -80.0f, 0.0f, 1.0f, 0.0f, false, false, flipperDR_texture);
 	flipperUL = App->physics->CreateFlipper(355, 213, 355 + 12, 213 + 16, flipperUp_left, 16, 16, 16, 0, 0, 0.0f, 60.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
@@ -89,6 +90,8 @@ bool ModulePlayer::Start()
 	flipperML = App->physics->CreateFlipper(115, 469, 115, 469 + 10, flipperUp_left, 16, 10, 10, 0, 0, -28.0f, 30.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
 	flipperMR = App->physics->CreateFlipper(489, 589, 489, 589 + 10, flipperUp_right, 16, 37, 13, 0, 0, -40.0f, 15.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
 	spring = App->physics->AddSpring(515, 980, spring_texture);
+	ball_start = App->physics->CreateCircle(516, 823, 12, false,true);
+	ball_start->listener = this;
 
 	return true;
 }
@@ -97,12 +100,15 @@ bool ModulePlayer::Start()
 bool ModulePlayer::CleanUp()
 {
 	LOG("Unloading player");
+	App->textures->Unload(ball);
+	App->textures->Unload(spring_texture);
 	App->textures->Unload(flipperDL_texture);
 	App->textures->Unload(flipperDR_texture);
 	App->textures->Unload(flipperUL_texture);
 	App->textures->Unload(flipperUR_texture);
 
 	App->physics->DestroyBody(ball_start);
+	App->physics->DestroyBody(spring);
 	App->physics->DestroyBody(flipperDL);
 	App->physics->DestroyBody(flipperDR);
 	App->physics->DestroyBody(flipperUL);
@@ -141,6 +147,19 @@ update_status ModulePlayer::Update()
 
 	spring->GetPosition(x, y);
 	App->renderer->Blit(spring_texture, x, y);
+
+	ball_start->GetPosition(x, y);
+	App->renderer->Blit(ball, x, y, NULL, 1.0f, ball_start->GetRotation());
+
+	p2List_item<PhysBody*>* c = balls.getFirst();
+
+	while (c != NULL)
+	{
+		int x, y;
+		c->data->GetPosition(x, y);
+		App->renderer->Blit(ball, x, y, NULL, 1.0f, c->data->GetRotation());
+		c = c->next;
+	}
 
 	///////////////////////////////////////////////////////////////
 
@@ -203,6 +222,23 @@ update_status ModulePlayer::Update()
 		spring_push = 0.0f;
 	}
 
+	//Key stuff - DEBUG
+
+	if (App->physics->GetDebug() == true)
+	{
+
+		if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
+		{
+			balls.add(App->physics->CreateCircle(516, 823, 12, false, true));
+			balls.getLast()->data->listener = this;
+		}
+
+		if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
+		{
+			balls.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 12, false, true));
+			balls.getLast()->data->listener = this;
+		}
+	}
 	return UPDATE_CONTINUE;
 }
 

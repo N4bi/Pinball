@@ -23,6 +23,9 @@ public:
 	~PhysBody();
 
 	void GetPosition(int& x, int &y) const;
+	void SetPosition(int x, int y);
+	void SetLinearVelocity(int x, int y);
+	void SetAngularVelocity(float velocity);
 	float GetRotation() const;
 	bool Contains(int x, int y) const;
 	void Turn(int degrees);
@@ -51,7 +54,7 @@ public:
 	update_status PostUpdate();
 	bool CleanUp();
 
-	PhysBody* CreateCircle(int x, int y, int radius);
+	PhysBody* CreateCircle(int x, int y, int radius,bool isSensor = false, bool ccd = false);
 	PhysBody* CreateRectangle(int x, int y, int width, int height);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height);
 	PhysBody* CreateChain(int x, int y, int* points, int size);
@@ -61,13 +64,9 @@ public:
 	PhysBody* AddSpring(int x_box, int y_box, SDL_Texture* texture, float restitution = 0.0f);
 	PhysBody* CreateFlipper(int flipper_pos_x, int flipper_pos_y, int pivot_x, int pivot_y, int* points, uint size, int anchorA_x, int anchorA_y, int AnchorB_x, int AnchorB_y, float lower_angle, float upper_angle, float density, float restitution, bool ccd, bool isSensor, SDL_Texture*);
 
-
-
-	
-	// b2ContactListener ---
-
-	void BeginContact(b2Contact* contact);
+	void PreSolve(b2Contact* contact, const b2Manifold* oldManifold);
 	void DestroyBody(PhysBody* body);
+	inline bool GetDebug() const { return debug; }
 
 private:
 

@@ -60,7 +60,7 @@ public:
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 
 public:
-	p2List<PhysBody*> balls;
+	
 	p2List<PhysBody*> walls;
 	PhysBody* flipperDL; // down left
 	PhysBody* flipperDR; // down right
@@ -71,6 +71,7 @@ public:
 	PhysBody* spring;
 	PhysBody* spring_wheel;
 	PhysBody* ball_start;
+
 	Bouncer bouncer_left_body;
 	Bouncer bouncer_right_body;
 	Bouncer green_bouncer1;
@@ -84,10 +85,7 @@ public:
 	Bouncer grey_bouncer7;
 
 
-	PhysBody* sensor;
-	bool sensed;
-
-	SDL_Texture* ball;
+	//Textures
 	SDL_Texture* table;
 	SDL_Texture* flipperDL_texture;
 	SDL_Texture* flipperDR_texture;
@@ -96,6 +94,8 @@ public:
 	SDL_Texture* spring_texture;
 	SDL_Texture* grey_bouncer_texture;
 	SDL_Texture* green_bouncer_texture;
+	SDL_Texture* bouncer_right_texture;
+	SDL_Texture* bouncer_left_texture;
 	SDL_Texture* points_texture;
 	SDL_Texture* green_cube_texture;
 	SDL_Texture* blue_cube_texture;
@@ -108,6 +108,7 @@ public:
 	SDL_Texture* boy_texture;
 	SDL_Texture* green_rectangle_texture;
 
+	//SFX
 	uint bonus_fx;
 	uint flipper_fx;
 	uint spring_down_fx;
@@ -118,6 +119,7 @@ public:
 	uint char_touch_fx;
 	uint side_bouncer_fx;
 	uint yellow_light_fx;
+	uint green_rectangle_fx;
 	
 	
 
@@ -129,4 +131,8 @@ public:
 	uint score = 0;
 	uint lives = 3;
 	uint counter_box = 0;
+	uint counter_char_box = 0;
+	uint counter_yellow_lights = 0;
+	uint counter_green_rectangles = 0;
+	uint total_counter = 0;
 };
