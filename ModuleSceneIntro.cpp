@@ -870,64 +870,54 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 				lights[i].on = true;
 				App->audio->PlayFx(lights[i].fx);
 				switch (lights[i].type)
-				{ // TODO: añadir el resto de casos para hacer mas combis.
+				{ 
 				case green_box:
 					counter_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case red_box :
 					counter_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case pink_box:
 					counter_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case yellow_box:
 					counter_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case blue_box:
 					counter_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case orange_box:
 					counter_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case boy_light:
 					counter_char_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case girl_light:
 					counter_char_box += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case yellow_light:
 					counter_yellow_lights += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 
 				case green_rectangle:
 					counter_green_rectangles += 1;
-					total_counter += 1;
 					score += 100;
 					break;
 				}

@@ -149,7 +149,8 @@ update_status ModulePlayer::Update()
 	App->renderer->Blit(spring_texture, x, y);
 
 	ball_start->GetPosition(x, y);
-	App->renderer->Blit(ball, x, y, NULL, 1.0f, ball_start->GetRotation());
+	//App->renderer->Blit(ball, x, y, NULL, 1.0f, ball_start->GetRotation());
+	App->renderer->Blit(ball, x, y);
 
 	p2List_item<PhysBody*>* c = balls.getFirst();
 
