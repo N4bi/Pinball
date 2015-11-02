@@ -29,7 +29,6 @@ bool ModulePlayer::Start()
 	spring_texture = App->textures->Load("Game/pinball/spring.png");
 
 	//SFX
-	bonus_fx = App->audio->LoadFx("Game/pinball/bonus.wav");
 	flipper_fx = App->audio->LoadFx("Game/pinball/sounds/flipper.wav");
 	spring_down_fx = App->audio->LoadFx("Game/pinball/sounds/spring_down.wav");
 	spring_up_fx = App->audio->LoadFx("Game/pinball/sounds/spring_up.wav");
@@ -90,7 +89,7 @@ bool ModulePlayer::Start()
 	flipperML = App->physics->CreateFlipper(115, 469, 115, 469 + 10, flipperUp_left, 16, 10, 10, 0, 0, -28.0f, 30.0f, 1.0f, 0.0f, false, false, flipperUL_texture);
 	flipperMR = App->physics->CreateFlipper(489, 589, 489, 589 + 10, flipperUp_right, 16, 37, 13, 0, 0, -40.0f, 15.0f, 1.0f, 0.0f, false, false, flipperUR_texture);
 	spring = App->physics->AddSpring(515, 980, spring_texture);
-	ball_start = App->physics->CreateCircle(516, 823, 12, false,true);
+	ball_start = App->physics->CreateCircle(516, 823, 12);
 	ball_start->listener = this;
 
 	return true;
@@ -149,7 +148,6 @@ update_status ModulePlayer::Update()
 	App->renderer->Blit(spring_texture, x, y);
 
 	ball_start->GetPosition(x, y);
-	//App->renderer->Blit(ball, x, y, NULL, 1.0f, ball_start->GetRotation());
 	App->renderer->Blit(ball, x, y);
 
 	p2List_item<PhysBody*>* c = balls.getFirst();
@@ -230,13 +228,13 @@ update_status ModulePlayer::Update()
 
 		if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
 		{
-			balls.add(App->physics->CreateCircle(516, 823, 12, false, true));
+			balls.add(App->physics->CreateCircle(516, 823, 12, false, false));
 			balls.getLast()->data->listener = this;
 		}
 
 		if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
 		{
-			balls.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 12, false, true));
+			balls.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 12, false, false));
 			balls.getLast()->data->listener = this;
 		}
 	}

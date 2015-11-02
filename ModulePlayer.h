@@ -41,7 +41,7 @@ public:
 	SDL_Texture* ball;
 
 	//SFX
-	uint bonus_fx;
+
 	uint flipper_fx;
 	uint spring_down_fx;
 	uint spring_up_fx;

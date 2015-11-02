@@ -109,17 +109,19 @@ public:
 	SDL_Texture* green_rectangle_texture;
 
 	//SFX
-	uint bonus_fx;
+
 	uint flipper_fx;
 	uint spring_down_fx;
 	uint spring_up_fx;
 	uint grey_green_bouncer_fx;
 	uint wall_fx;
 	uint color_box_fx;
+	uint color_box_5_fx;
 	uint char_touch_fx;
 	uint side_bouncer_fx;
 	uint yellow_light_fx;
 	uint green_rectangle_fx;
+	uint green_rectangle_2_fx;
 	
 	
 
@@ -134,5 +136,4 @@ public:
 	uint counter_char_box = 0;
 	uint counter_yellow_lights = 0;
 	uint counter_green_rectangles = 0;
-	uint total_counter = 0;
 };

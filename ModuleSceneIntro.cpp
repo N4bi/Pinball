@@ -65,10 +65,12 @@ bool ModuleSceneIntro::Start()
 
 				//Sensor fx
 	color_box_fx = App->audio->LoadFx("Game/pinball/sounds/color_box.wav");
+	color_box_5_fx = App->audio->LoadFx("Game/pinball/sounds/color_box_5.wav");
 	char_touch_fx = App->audio->LoadFx("Game/pinball/sounds/char_touch.wav");
 	side_bouncer_fx = App->audio->LoadFx("Game/pinball/sounds/bell.wav");
 	yellow_light_fx = App->audio->LoadFx("Game/pinball/sounds/dog_barking.wav");
 	green_rectangle_fx = App->audio->LoadFx("Game/pinball/sounds/green_rectangle.wav");
+	green_rectangle_2_fx = App->audio->LoadFx("Game/pinball/sounds/green_rectangle_2.wav");
 	player_lose_fx = App->audio->LoadFx("Game/pinball/sounds/player_lose.wav");
 
 
@@ -444,7 +446,7 @@ bool ModuleSceneIntro::Start()
 	grey_bouncer2.body = App->physics->CreateCircleStatic(130, 298, 11, 1.0f, 0.6f);
 	grey_bouncer2.body->listener = this;
 
-	grey_bouncer3.body = App->physics->CreateCircleStatic(510, 248, 11, 1.0f, 0.6f);
+	grey_bouncer3.body = App->physics->CreateCircleStatic(513, 248, 8, 1.0f, 0.6f);
 	grey_bouncer3.body->listener = this;
 
 	grey_bouncer4.body = App->physics->CreateCircleStatic(264, 148, 11, 1.0f, 0.6f);
@@ -545,7 +547,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			bouncer_right_body.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -558,7 +560,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			bouncer_left_body.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -572,7 +574,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			green_bouncer1.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -585,7 +587,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			green_bouncer2.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 		// Grey bouncers
@@ -600,7 +602,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer1.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -614,7 +616,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer2.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -628,7 +630,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer3.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -642,7 +644,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer4.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -656,7 +658,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer5.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -670,7 +672,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer6.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -684,7 +686,7 @@ update_status ModuleSceneIntro::Update()
 		else
 		{
 			grey_bouncer7.hit_timer = 0;
-			//Score here += x;
+			score += 100;
 		}
 	}
 
@@ -707,7 +709,7 @@ update_status ModuleSceneIntro::Update()
 			{
 				lights[i].on = false;
 				counter_box = 0;
-				App->audio->PlayFx(char_touch_fx);
+				App->audio->PlayFx(color_box_5_fx);
 				
 			}
 		}
@@ -732,7 +734,7 @@ update_status ModuleSceneIntro::Update()
 
 	if (counter_yellow_lights > 7)
 	{
-		score += 1000;
+		score += 5000;
 
 		for (uint i = 0; i < lights.Count(); ++i)
 		{
@@ -757,7 +759,7 @@ update_status ModuleSceneIntro::Update()
 			{
 				lights[i].on = false;
 				counter_green_rectangles = 0;
-				App->audio->PlayFx(green_rectangle_fx);
+				App->audio->PlayFx(green_rectangle_2_fx);
 
 			}
 		}
@@ -903,12 +905,12 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 
 				case boy_light:
 					counter_char_box += 1;
-					score += 100;
+					score += 200;
 					break;
 
 				case girl_light:
 					counter_char_box += 1;
-					score += 100;
+					score += 200;
 					break;
 
 				case yellow_light:
