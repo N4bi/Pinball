@@ -407,29 +407,29 @@ bool ModuleSceneIntro::Start()
 	//Walls & Bouncers
 	walls.add(App->physics->AddWall(0, 0, table, 70));
 
-	walls.add(App->physics->AddWall(0, 0, triangle_right, 44,0.4f));
-	walls.add(App->physics->AddWall(0, 0, launcher, 88, 0.0f));
-	walls.add(App->physics->AddWall(0, 0, triangle_left, 38, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, mid_triangle_left, 12, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, mid_triangle_right, 18, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, rectangle_up_left, 14, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, rectangle_up_right, 18, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, triangle_up_left, 20, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, triangle2_up_left, 8, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, triangle_right, 44,0.6f));
+	walls.add(App->physics->AddWall(0, 0, launcher, 88, 0.4));
+	walls.add(App->physics->AddWall(0, 0, triangle_left, 38, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, triangle_left2, 12, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, mid_triangle_left, 12, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, mid_triangle_right, 18, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, rectangle_up_left, 14, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, rectangle_up_right, 18, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, triangle_up_left, 20, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, triangle2_up_left, 8, 0.6f));
 	walls.add(App->physics->AddWall(0, 0, tunnel_wall_right, 66, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, tunnel_wall_left, 76, 0.4f));
-	walls.add(App->physics->AddWall(0, 0, multi_ball_stuff, 46, 0.4f));
+	walls.add(App->physics->AddWall(0, 0, tunnel_wall_left, 76, 0.6f));
+	walls.add(App->physics->AddWall(0, 0, multi_ball_stuff, 46, 0.6f));
 
 
 
 	// Other stuff
 
 		//Side bouncers
-	bouncer_left_body.body = App->physics->CreateChainStatic(0, 0, bouncer_left, 12, 1.0f, 0.7f, false);
+	bouncer_left_body.body = App->physics->CreateChainStatic(0, 0, bouncer_left, 12, 1.0f, 1.0f, false);
 	bouncer_left_body.body->listener = this;
 
-	bouncer_right_body.body = App->physics->CreateChainStatic(0, 0, bouncer_right, 12, 1.0f, 0.7f, false);
+	bouncer_right_body.body = App->physics->CreateChainStatic(0, 0, bouncer_right, 12, 1.0f, 1.0f, false);
 	bouncer_right_body.body->listener = this;
 
 		//Green bouncers on the middle of the table
@@ -440,25 +440,25 @@ bool ModuleSceneIntro::Start()
 	green_bouncer2.body->listener = this;
 
 		// Grey bouncers
-	grey_bouncer1.body = App->physics->CreateCircleStatic(471, 756, 11, 1.0f, 0.6f);
+	grey_bouncer1.body = App->physics->CreateCircleStatic(471, 756, 11, 1.0f, 0.9f);
 	grey_bouncer1.body->listener = this;
 
-	grey_bouncer2.body = App->physics->CreateCircleStatic(130, 298, 11, 1.0f, 0.6f);
+	grey_bouncer2.body = App->physics->CreateCircleStatic(130, 298, 11, 1.0f, 0.9f);
 	grey_bouncer2.body->listener = this;
 
-	grey_bouncer3.body = App->physics->CreateCircleStatic(513, 248, 8, 1.0f, 0.6f);
+	grey_bouncer3.body = App->physics->CreateCircleStatic(513, 248, 8, 1.0f, 0.9f);
 	grey_bouncer3.body->listener = this;
 
-	grey_bouncer4.body = App->physics->CreateCircleStatic(264, 148, 11, 1.0f, 0.6f);
+	grey_bouncer4.body = App->physics->CreateCircleStatic(264, 148, 11, 1.0f, 0.9f);
 	grey_bouncer4.body->listener = this;
 
-	grey_bouncer5.body = App->physics->CreateCircleStatic(344, 144, 11, 1.0f, 0.6f);
+	grey_bouncer5.body = App->physics->CreateCircleStatic(344, 144, 11, 1.0f, 0.9f);
 	grey_bouncer5.body->listener = this;
 
-	grey_bouncer6.body = App->physics->CreateCircleStatic(477, 144, 11, 1.0f, 0.6f);
+	grey_bouncer6.body = App->physics->CreateCircleStatic(477, 144, 11, 1.0f, 0.9f);
 	grey_bouncer6.body->listener = this;
 
-	grey_bouncer7.body = App->physics->CreateCircleStatic(420, 79, 11, 1.0f, 0.6f);
+	grey_bouncer7.body = App->physics->CreateCircleStatic(420, 79, 11, 1.0f, 0.9f);
 	grey_bouncer7.body->listener = this;
 	
 

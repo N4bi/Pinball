@@ -170,17 +170,17 @@ update_status ModulePlayer::Update()
 		{
 			App->audio->PlayFx(flipper_fx);
 		}
-		flipperDL->Turn(-360);
-		flipperUL->Turn(-360);
-		flipperML->Turn(-360);
+		flipperDL->Turn(-180);
+		flipperUL->Turn(-180);
+		flipperML->Turn(-250);
 
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_UP)
 	{
-		flipperDL->Turn(360);
-		flipperUL->Turn(360);
-		flipperML->Turn(360);
+		flipperDL->Turn(180);
+		flipperUL->Turn(180);
+		flipperML->Turn(250);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
@@ -190,17 +190,17 @@ update_status ModulePlayer::Update()
 			App->audio->PlayFx(flipper_fx);
 		}
 
-		flipperDR->Turn(360);
-		flipperUR->Turn(360);
-		flipperMR->Turn(360);
+		flipperDR->Turn(180);
+		flipperUR->Turn(180);
+		flipperMR->Turn(250);
 
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_UP)
 	{
-		flipperDR->Turn(-360);
-		flipperUR->Turn(-360);
-		flipperMR->Turn(-360);
+		flipperDR->Turn(-180);
+		flipperUR->Turn(-180);
+		flipperMR->Turn(-250);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
